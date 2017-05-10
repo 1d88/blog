@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="canvas" height="500" width="750" style="border: 1px solid #f1f1f1;display: block;margin: 50px auto;"></canvas>
+<input type="file" multiple id="upload">
+</body>
+<script>
+    class Cut {
+        constructor() {
+            let canvas = this.canvas = document.querySelector('#canvas');
+            this.ctx = canvas.getContext('2d');
+            this.ctxWidth = canvas.width;
+            this.ctxHeight = canvas.height;
+            this.el = document.querySelector('#upload');
+            this._init();
+        }
+
+        _init() {
+            this._bindEvent();
+        }
+
+        _bindEvent() {
+            let that = this;
+            this.el.addEventListener('change', function () {
+                Array.prototype.forEach.call(this.files, function (item) {
+                    let reader = new FileReader();
+                    let url = reader.readAsDataURL(item);
+                    reader.onload = function (event) {
+                        that._loadImg(event.target.result)
+                    }
+                });
+            }, false);
+
+            this.canvas.addEventListener('mousedown', function (event) {
+                that.startX = event.offsetX;
+                that.startY = event.offsetY;
+                that._drawRect(that.startX, that.startY);
+            }, false);
+            this.canvas.addEventListener('mousemove', function (event) {
+                if (that.startX == 'undefined') return;
+                that._drawRect(that.startX, that.startY, event.offsetX - that.startX, event.offsetY - that.startY);
+            }, false);
+            this.canvas.addEventListener('mouseup', function (event) {
+                that.startX = void 0;
+                that.startY = void 0;
+            }, false);
+        }
+
+        _drawRect(x, y, w, h) {
+            this.ctx.clearRect(x, y, w, h);
+            this.ctx.strokeRect(x, y, w || 0, h || 0);
+        }
+
+        _loadImg(url) {
+            let that = this;
+            let img = document.createElement('img');
+            img.src = url;
+            img.onload = () => {
+                that._drawImg(img);
+            };
+        }
+
+        _drawImg(img) {
+            let config = this._calImgSize(img);
+            this.ctx.drawImage(img, 0, 0, config.width, config.height);
+        }
+
+        _calImgSize(img) {
+            let width = this.ctxWidth,
+                height = this.ctxHeight,
+                imgWidth = img.width,
+                imgHeight = img.height,
+                drawHeight,
+                drawWidth;
+            //首先图片的形状
+            if (imgWidth > imgHeight) {
+                drawWidth = width;
+                drawHeight = (drawWidth / imgWidth) * imgHeight;
+            } else {
+                drawHeight = height;
+                drawWidth = (drawHeight / imgHeight) * imgWidth;
+            }
+            return {
+                width: drawWidth,
+                height: drawHeight
+            }
+        }
+    }
+    new Cut();
+</script>
+</html>
