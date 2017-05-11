@@ -4,27 +4,75 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
+<style>
+    .container {
+        position: relative;
+        border: 1px solid #f1f1f1;
+        display: block;
+        margin: 50px auto;
+        height: 500px;
+        width: 750px;
+    }
+
+    .backend {
+        position: absolute;
+        z-index: 1;
+    }
+
+    .clip {
+        position: absolute;
+        z-index: 2;
+    }
+
+</style>
 <body>
-<canvas id="canvas" height="500" width="750" style="border: 1px solid #f1f1f1;display: block;margin: 50px auto;"></canvas>
-<input type="file" multiple id="upload">
+<div class="container">
+    <canvas id="backImg" height="500" width="750" class="backend"></canvas>
+    <!--<canvas id="clip" height="500" width="750" class="clip"></canvas>-->
+</div>
+<input type="file" id="upload">no multiple
 </body>
 <script>
-    class Cut {
+    class ImageContain {
         constructor() {
-            let canvas = this.canvas = document.querySelector('#canvas');
-            this.ctx = canvas.getContext('2d');
-            this.ctxWidth = canvas.width;
-            this.ctxHeight = canvas.height;
             this.el = document.querySelector('#upload');
+            let canvas = this.canvas = document.querySelector('#backImg');
+            this.ctx = canvas.getContext('2d');
+            this.cvsWidth = canvas.width;
+            this.cvsHeight = canvas.height;
+            //动画数据相关
+            this.data = {
+                firstRender: true,
+                scale: 1,
+                action: 'view',
+                offsetX: 0,
+                offsetY: 0,
+                drawX: 0,
+                drawY: 0,
+                drawHeight: 0,
+                drawWidth: 0
+            };
             this._init();
         }
 
+        _setData(key, value) {
+            this.data[key] = value;
+        }
+
+        _getData(key) {
+            return this.data[key];
+        }
+
         _init() {
+            this._changeCursor();
             this._bindEvent();
         }
 
         _bindEvent() {
-            let that = this;
+            let that = this,
+                startX,
+                startY;
+
             this.el.addEventListener('change', function () {
                 Array.prototype.forEach.call(this.files, function (item) {
                     let reader = new FileReader();
@@ -36,23 +84,41 @@
             }, false);
 
             this.canvas.addEventListener('mousedown', function (event) {
-                that.startX = event.offsetX;
-                that.startY = event.offsetY;
-                that._drawRect(that.startX, that.startY);
+                that._setData('action', 'movestart');
+                startX = event.offsetX;
+                startY = event.offsetY;
             }, false);
             this.canvas.addEventListener('mousemove', function (event) {
-                if (that.startX == 'undefined') return;
-                that._drawRect(that.startX, that.startY, event.offsetX - that.startX, event.offsetY - that.startY);
+                that._moveImg(startX, startY, event);
             }, false);
             this.canvas.addEventListener('mouseup', function (event) {
-                that.startX = void 0;
-                that.startY = void 0;
+                that._setData('action', 'moveend');
+                that._moveImg(startX, startY, event);
+                that._setData('action', 'view');
+            }, false);
+
+            this.canvas.addEventListener('mousewheel', function (event) {
+                that._setData('action', 'scale');
+                that._scaleImg(event.wheelDelta);
             }, false);
         }
 
-        _drawRect(x, y, w, h) {
-            this.ctx.clearRect(x, y, w, h);
-            this.ctx.strokeRect(x, y, w || 0, h || 0);
+        _scaleImg(wheelDelta) {
+            if (this._getData('action') !== 'scale') return;
+            let scale = this._getData('scale');
+            scale += (wheelDelta / 600);
+            if (scale < 1) scale = 1;
+            this._setData('scale', scale);
+            this._drawImg();
+        }
+
+        _moveImg(startX, startY, event) {
+            if (!this._getData('action').match(/^move/)) return;
+            let eventX = event.offsetX,
+                eventY = event.offsetY;
+            this._setData('offsetX', startX - eventX);
+            this._setData('offsetY', startY - eventY);
+            this._drawImg();
         }
 
         _loadImg(url) {
@@ -60,36 +126,103 @@
             let img = document.createElement('img');
             img.src = url;
             img.onload = () => {
-                that._drawImg(img);
+                that.image = img;
+                that._drawImg();
             };
         }
 
-        _drawImg(img) {
-            let config = this._calImgSize(img);
-            this.ctx.drawImage(img, 0, 0, config.width, config.height);
+        _changeCursor(type) {
+            if (type === 'cut') {
+                this.canvas.style.cursor = 'crosshair';
+            } else {
+                this.canvas.style.cursor = 'move';
+            }
         }
 
-        _calImgSize(img) {
-            let width = this.ctxWidth,
-                height = this.ctxHeight,
-                imgWidth = img.width,
-                imgHeight = img.height,
+        _drawImg() {
+            let img = this.image;
+            let temp;
+            if (this._getData('firstRender')) {
+                temp = this._calFirstRender(img.width, img.height);
+                this._setData('firstRender', false);
+            } else {
+                temp = this._calImgSize(img.width, img.height);
+            }
+            this.ctx.clearRect(0, 0, this.cvsWidth, this.cvsHeight);
+            this.ctx.fillStyle = 'rgba(0,0,0,.5)';
+            this.ctx.fillRect(0, 0, this.cvsWidth, this.cvsHeight);
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillRect(temp.x, temp.y, temp.w, temp.h);
+            this.ctx.drawImage(img, temp.x, temp.y, temp.w, temp.h);
+        }
+
+        //第一次渲染
+        _calFirstRender(width, height) {
+            let cvsWidth = this.cvsWidth,
+                cvsHeight = this.cvsHeight,
+                imgWidth = width,
+                imgHeight = height,
+                drawX = 0,
+                drawY = 0,
                 drawHeight,
                 drawWidth;
-            //首先图片的形状
             if (imgWidth > imgHeight) {
-                drawWidth = width;
+                drawWidth = cvsWidth;
                 drawHeight = (drawWidth / imgWidth) * imgHeight;
+                drawY = (cvsHeight - drawHeight) / 2;
             } else {
-                drawHeight = height;
+                drawHeight = cvsHeight;
                 drawWidth = (drawHeight / imgHeight) * imgWidth;
+                drawX = (cvsWidth - drawWidth) / 2;
+            }
+            this._setData('drawX', drawX);
+            this._setData('drawY', drawY);
+            this._setData('drawHeight', drawHeight);
+            this._setData('drawWidth', drawWidth);
+
+            return {
+                x: drawX,
+                y: drawY,
+                w: drawWidth,
+                h: drawHeight
+            }
+        }
+
+        //计算
+        _calImgSize(width, height) {
+            let scale = this._getData('scale'),
+                offsetX = this._getData('offsetX'),
+                offsetY = this._getData('offsetY'),
+                drawX = this._getData('drawX'),
+                drawY = this._getData('drawY'),
+                drawHeight = this._getData('drawHeight'),
+                drawWidth = this._getData('drawWidth');
+
+            if (this._getData('action') === 'scale' && scale) {
+                drawX -= (scale - 1) * drawWidth / 2;
+                drawY -= (scale - 1) * drawHeight / 2;
+                drawWidth = drawWidth * scale;
+                drawHeight = drawHeight * scale;
+                this._setData('drawX', drawX);
+                this._setData('drawY', drawY);
+                this._setData('drawHeight', drawHeight);
+                this._setData('drawWidth', drawWidth);
+            } else if (this._getData('action').match(/^move/) && (offsetX || offsetY)) {
+                drawX -= offsetX;
+                drawY -= offsetY;
+                if (this._getData('action') === 'moveend') {
+                    this._setData('drawX', drawX);
+                    this._setData('drawY', drawY);
+                }
             }
             return {
-                width: drawWidth,
-                height: drawHeight
+                x: drawX,
+                y: drawY,
+                w: drawWidth,
+                h: drawHeight
             }
         }
     }
-    new Cut();
+    new ImageContain();
 </script>
 </html>
