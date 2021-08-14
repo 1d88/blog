@@ -1,6 +1,7 @@
-## fis3配置小全
+## fis3 配置
 
 ### 项目配置
+
 ```
 const fis = require('fis3');
 //设置命名空间
@@ -25,7 +26,9 @@ var DEFAULT_SETTINGS = {
 	},
 }
 ```
+
 ### 文件相应配置
+
 ```
 //基础属性
 fis.match('',{
@@ -70,10 +73,12 @@ fis.match('',{
 	//开启同名依赖
 	useSameNameRequire:true,
 	//文件是否使用编译缓存
-	useCache:false	
+	useCache:false
 });
 ```
+
 ### 插件配置
+
 ```
 //插件属性
 fis.match('',{
@@ -81,7 +86,7 @@ fis.match('',{
 	lint:fis.plugin('js',{}),
 	//标准化前处理
 	preprocessor:fis.plugin('image-set'),
-	//标准化后处理 
+	//标准化后处理
 	postprocessor:fis.plugin('require-async'),
 });
 //html压缩
@@ -109,8 +114,8 @@ fis.match('*.less',{
 	//parser:fis.plugin('node-sass'),
 });
 //优化处理插件
-fis.match('*.css}',{	
-	optimizer:fis.plugin('clean-css'),	
+fis.match('*.css}',{
+	optimizer:fis.plugin('clean-css'),
 });
 //打包处理插件
 fis.match('::package',{
@@ -128,9 +133,12 @@ fis.match('**', {
 	})
 });
 ```
+
 ps:
-* fis3默认不指定js模块化的类别，所以当使用模块化开发时,使用fis.hook方法，如果不指定，直观的展现是你所写的js没有被自动包裹，即使你在配置里面已经设置了isMod:true。
-* html里可以使用underscore的方法
+
+- fis3 默认不指定 js 模块化的类别，所以当使用模块化开发时,使用 fis.hook 方法，如果不指定，直观的展现是你所写的 js 没有被自动包裹，即使你在配置里面已经设置了 isMod:true。
+- html 里可以使用 underscore 的方法
+
 ```
 	 html 中 增加对 underscore 模板语言的支持
 	 <%var menu =1%>
