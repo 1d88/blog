@@ -33,9 +33,7 @@ if (options && options._isComponent) {
 
 ```js
 resolveConstructorOptions(vm.constructor);
-```
 
-```js
 function resolveConstructorOptions(Ctor) {
   // 查看入参类型
   console.log("resolveConstructorOptions", Ctor.name, Ctor === Vue);
@@ -132,44 +130,64 @@ extend(Vue.options.components, platformComponents);
 测试 case
 
 ```js
-const option = {
-  template: "<div>a</div>",
-};
-const a = Vue.extend(option);
-Vue.filter("my-filter", function(value) {
-  return value;
+const mA = Vue.extend({
+  data() {
+    return { a: "a" };
+  },
+  name: "m-a",
+  template: "<div>{{a}}</div>",
 });
-const b = Vue.extend(option);
+Vue.mixin({
+  created: function() {},
+});
 const app = new Vue({
   components: {
-    "my-a": a,
-    "my-b": b,
+    "my-a": mA,
+    "my-b": mA,
   },
+  data: { a: 1 },
   template: "<main><my-a></my-a><my-b></my-b></main>",
   mounted() {},
 }).$mount("#app");
 ```
 
+首先使用`Vue.extend`创建`Vue`子类，`mA.constructor:VueComponent`.superOptions = Vue.options；Vue.mixin 调用了`mergeOptions`，返回了新的对象，因此走入了这个 case,下面为`Vue.mixin`的代码
+
 ```js
-if (Ctor.super) {
-  // 获取父级属性
-  var superOptions = resolveConstructorOptions(Ctor.super);
-  var cachedSuperOptions = Ctor.superOptions;
-  console.log(
-    "my-filter" in superOptions.filters,
-    "my-filter" in cachedSuperOptions
-  );
-  console.log(superOptions === cachedSuperOptions);
-}
-// output: true false
-// output: true
+Vue.mixin = function(mixin) {
+  this.options = mergeOptions(this.options, mixin);
+  return this;
+};
 ```
 
-首先使用`Vue.extend`创建`Vue`子类，此时 Vue.options.filters 里面并不存在`my-filter`，但 `superOptions` 和 `cachedSuperOptions` 指向的还是同一个引用地址。正常使用的情况下，想不到有什么操作会使 Vue.options 改变指针。
-
-resolveModifiedOptions 函数
+进入 superOptions !== cachedSuperOptions 的场景之后，更新自身的 options
 
 ```js
+function resolveConstructorOptions(Ctor) {
+  var superOptions = resolveConstructorOptions(Ctor.super);
+  var cachedSuperOptions = Ctor.superOptions;
+  console.log(superOptions !== cachedSuperOptions); // output: true
+  if (superOptions !== cachedSuperOptions) {
+    // super option changed,
+    // need to resolve new options.
+    // 更新其 superOptions 为最新的值
+    Ctor.superOptions = superOptions;
+    // check if there are any late-modified/attached options (#4976)
+    // 查找变更的属性
+    var modifiedOptions = resolveModifiedOptions(Ctor);
+    // update base extend options
+    if (modifiedOptions) {
+      extend(Ctor.extendOptions, modifiedOptions);
+    }
+    // 重新执行获取当前的options，和在Vue.extend中相同的做法
+    options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions);
+    if (options.name) {
+      options.components[options.name] = Ctor;
+    }
+  }
+}
+
+// 函数意图找出变更的选项
 function resolveModifiedOptions(Ctor) {
   var modified;
   var latest = Ctor.options;
@@ -186,7 +204,7 @@ function resolveModifiedOptions(Ctor) {
 }
 ```
 
-`sealedOptions`在`Vue.extend`中维护
+`sealedOptions`在`Vue.extend`中维护，是构建子类 VueComponent 时 merge 最终的 options
 
 ```js
 Vue.extend = function(extendOptions) {
@@ -197,37 +215,6 @@ Vue.extend = function(extendOptions) {
   Sub.options = mergeOptions(Super.options, extendOptions);
   Sub.sealedOptions = extend({}, Sub.options);
 };
-```
-
-`resolveModifiedOptions`函数意图找出变更的选项
-
-```js
-if (modifiedOptions) {
-  extend(Ctor.extendOptions, modifiedOptions);
-}
-// 重新merge选项
-options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions);
-```
-
-如果存在变更的选项，那么更新当前的属性到 `VueComponent.extendOptions`
-再次调用 `mergeOptions` 合并参数。如果参数存在 `name` 属性，维护到 options 的`components`中
-
-```js
-// 如果存在 name 属性
-if (options.name) {
-  options.components[options.name] = Ctor;
-}
-```
-
-```
-{components: {…}, directives: {…}, filters: {…}, name: "a", _base: ƒ, …}
-components: {a: ƒ VueComponent(options)}
-directives: {}
-filters: {}
-name: "a"
-template: "<div>a</div>"
-_Ctor: {0: ƒ}
-_base: ƒ Vue(options)
 ```
 
 ## 2 mergeOptions
@@ -516,4 +503,242 @@ function mergeOptions(parent, child, vm) {
 ### 2.6、合并策略
 
 让我们打印下 `config.optionMergeStrategies`
+
 <img src="./images/内置的合并策略.jpg" width="600">
+
+默认的策略：如果传入子选项，那么使用子选项，如果没有，使用父选项
+
+```js
+var defaultStrat = function(parentVal, childVal) {
+  return childVal === undefined ? parentVal : childVal;
+};
+```
+
+#### 2.6.1、el 和 propsData 的合并策略 defaultStrat；如果传入，就直接使用此选项
+
+#### 2.6.2、data、provide 的合并策略
+
+```js
+function mergeDataOrFn(parentVal, childVal, vm) {
+  // 如果不存在vm
+  if (!vm) {
+    // in a Vue.extend merge, both should be functions
+    // 有父用父，有子用子，如果都提供合并父子
+    if (!childVal) {
+      return parentVal;
+    }
+    if (!parentVal) {
+      return childVal;
+    }
+    // when parentVal & childVal are both present,
+    // we need to return a function that returns the
+    // merged result of both functions... no need to
+    // check if parentVal is a function here because
+    // it has to be a function to pass previous merges.
+    return function mergedDataFn() {
+      return mergeData(
+        typeof childVal === "function" ? childVal.call(this, this) : childVal,
+        typeof parentVal === "function" ? parentVal.call(this, this) : parentVal
+      );
+    };
+  } else {
+    return function mergedInstanceDataFn() {
+      // instance merge
+      var instanceData =
+        typeof childVal === "function" ? childVal.call(vm, vm) : childVal;
+      var defaultData =
+        typeof parentVal === "function" ? parentVal.call(vm, vm) : parentVal;
+      if (instanceData) {
+        return mergeData(instanceData, defaultData);
+      } else {
+        return defaultData;
+      }
+    };
+  }
+}
+strats.provide = mergeDataOrFn;
+```
+
+分为两种情况：传入了实例 vm 和没有传入 vm
+
+- 传入了实例 vm
+  - 有子数据 mergeData 父子 data
+  - 无子数据 返回父 data
+- 没有传入 vm
+  - 有父无子返回父 data
+  - 有子无父返回子 data
+  - 都有 mergeData 父子 data
+
+mergeData 函数
+
+入参 to 是目标对象，这里传入的子 data,from 是父 data
+
+```js
+function mergeData(to, from) {
+  // 如果不存在form数据，直接返回to
+  if (!from) {
+    return to;
+  }
+  var key, toVal, fromVal;
+
+  var keys = hasSymbol ? Reflect.ownKeys(from) : Object.keys(from);
+  // 把from data的属性作为keys，遍历 keys
+  for (var i = 0; i < keys.length; i++) {
+    key = keys[i];
+    // in case the object is already observed...
+    // "__ob__" 是指向Observer的指针
+    if (key === "__ob__") {
+      continue;
+    }
+    toVal = to[key];
+    fromVal = from[key];
+    // 如果to数据没有这个属性，意味着需要添加这个属性到to中
+    if (!hasOwn(to, key)) {
+      // 建立数据响应式
+      set(to, key, fromVal);
+    } else if (
+      // 此处是数据递归的判断，每个对象都要数据的merge
+      toVal !== fromVal &&
+      isPlainObject(toVal) &&
+      isPlainObject(fromVal)
+    ) {
+      mergeData(toVal, fromVal);
+    }
+  }
+  return to;
+}
+```
+
+如果我们 `Vue.options.data` = `{all:1}`;那么所有的子组件都会插入一个响应式的`all`属性
+
+#### 2.6.3、hook 的合并策略
+
+```js
+function mergeHook(parentVal, childVal) {
+  var res = childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : Array.isArray(childVal)
+      ? childVal
+      : [childVal]
+    : parentVal;
+  return res ? dedupeHooks(res) : res;
+}
+function dedupeHooks(hooks) {
+  var res = [];
+  for (var i = 0; i < hooks.length; i++) {
+    // indexOf 使用严格的方式
+    if (res.indexOf(hooks[i]) === -1) {
+      res.push(hooks[i]);
+    }
+  }
+  return res;
+}
+```
+
+返回一个 hook 数组，并且 hook 数组内 hook 不重复，父 hook 在前，子 hook 在后，这意味着 mixins 进来的 hook 会比实例的 hook 先触发，因为子组件的 options.mixins 也会首先合并到父 options 中。
+
+#### 2.6.4、components、directives、filters 的合并策略
+
+```js
+function mergeAssets(parentVal, childVal, vm, key) {
+  // 以parentVal为原型创建对象
+  var res = Object.create(parentVal || null);
+  if (childVal) {
+    assertObjectType(key, childVal, vm);
+    // 将 childVal 拷贝到 res上
+    return extend(res, childVal);
+  } else {
+    return res;
+  }
+}
+```
+
+主要是创建一个以父（components、directives、filters）为原型的对象，然后将子（components、directives、filters）添加到这个对象，如果属性名相同会遮盖掉原型上的方法，但是内置的 components、directives 名称不允许重复。
+
+#### 2.6.5、watch 的合并策略
+
+```js
+strats.watch = function(parentVal, childVal, vm, key) {
+  // work around Firefox's Object.prototype.watch...
+  // {}.watch 火狐浏览器拥有Object.prototype.watch 方法
+  // nativeWatch = {}.watch
+  // 如果传入的watch 是 Object.prototype.watch，那么不做合并处理
+  if (parentVal === nativeWatch) {
+    parentVal = undefined;
+  }
+  if (childVal === nativeWatch) {
+    childVal = undefined;
+  }
+  /* istanbul ignore if */
+  // childVal 传入 flasy,或者是 nativeWatch，直接返回空对象
+  if (!childVal) {
+    return Object.create(parentVal || null);
+  }
+  {
+    assertObjectType(key, childVal, vm);
+  }
+  // childVal 传入 flasy,或者是 nativeWatch,直接返回childVal
+  if (!parentVal) {
+    return childVal;
+  }
+  // 获取 parentVal 拷贝到 ret 对象中
+  var ret = {};
+  extend(ret, parentVal);
+  for (var key$1 in childVal) {
+    var parent = ret[key$1];
+    var child = childVal[key$1];
+    // 如果ret中 也存相同key的watch，那么数组化，相同key放入一个数组中
+    if (parent && !Array.isArray(parent)) {
+      parent = [parent];
+    }
+    ret[key$1] = parent
+      ? parent.concat(child)
+      : Array.isArray(child)
+      ? child
+      : [child];
+    // 相同的key对应一个数组，数据结构为：{key:[parentVal[key],childVal[key]]}
+  }
+  return ret;
+};
+```
+
+watch 的合并首先考虑了火狐浏览器的兼容性，避免传入`{}.watch`；其次是以`childVal`为目标迭代获取 `key`
+
+- 如果 childVal 的 key 在 parentVal 中 存在，那么 {key:[parentVal[key],childVal[key]]}
+- 否则，{key:[childVal[key]]}
+
+#### 2.6.6、props、methods、inject、computed 的合并策略
+
+```js
+strats.props = strats.methods = strats.inject = strats.computed = function(
+  parentVal,
+  childVal,
+  vm,
+  key
+) {
+  // 不存在parentVal 直接返回childVal
+  if (!parentVal) {
+    return childVal;
+  }
+  var ret = Object.create(null);
+  extend(ret, parentVal);
+  if (childVal) {
+    extend(ret, childVal);
+  }
+  // 此过程类似于 extend({},parentVal,childVal)
+  return ret;
+};
+strats.provide = mergeDataOrFn;
+```
+
+props、methods、inject、computed 的合并策略，首先拷贝 parentVal,然后拷贝 childVal，相同 key 下 childVal 的值会覆盖掉 parentVal。最终返回结果同时拥有 parentVal 的选项。
+
+## 总结
+
+`resolveConstructorOptions`是重要的方法，用来解决构造函数`options`；
+
+- 如果是入参 Vue，返回通过 `initGlobalAPI`函数维护的 options；
+- 如果是 Vue 子类 VueComponent，还会考虑在调用 Vue.extend 之后，再次调用 Vue.mixins(调用了`mergeOptions`重新覆盖了 Vue.options),缓存父级 option 和真实父级 option 不一致的问题；
+
+`mergeOptions`主要用来合并参数，入参 parentOption，childOption 和 vm。parentOption 是构造函数 Vue 或者 Vue 子类 VueComponent 的属性 (options`Vue.options | VueComponent.options`)，是用来初始化 Vue 组件的基本选项配置。函数返回一个合并之后的 options；合并参数带来的功能是父类构造选项会直接影响子类的构造选项，实现 mixins、公共内建组件、全局组件、指令、过滤器、注入等功能。
