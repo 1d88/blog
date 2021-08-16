@@ -24,8 +24,9 @@ if (options && options._isComponent) {
   - normalizeProps
   - normalizeInject
   - normalizeDirectives
+  - mergeField
 
-由于在 `mergeOptions` 函数首先调用 `resolveConstructorOptions`，所以先来分析 `resolveConstructorOptions`
+由于在 `mergeOptions` 首先调用函数 `resolveConstructorOptions`，所以先来分析 `resolveConstructorOptions`
 
 ## 1、resolveConstructorOptions
 
@@ -70,7 +71,7 @@ function resolveConstructorOptions(Ctor) {
 
 ### 1.1、入参的类型：
 
-`resolveConstructorOptions`传入参数为实例构造函数 `Vue` 或者 `VueComponent`，`vm.constructor`访问当前实例的 `constructor`，会查找原型链的`constructor`，所以指向了 Vue 或者 VueComponent；因此实例挂载时`resolveConstructorOptions`的入参为`Vue`，加载子组件时参数合并的入参是`VueComponent`。
+`resolveConstructorOptions`传入参数为构造函数 `Vue` 或者 `VueComponent`；`mergeOptions`调用`resolveConstructorOptions(vm.constructor)`，`vm.constructor`访问当前实例的 `constructor`，实例上不存在，会继续查找到原型链的`constructor`，所以指向了 `Vue` 或者 `VueComponent`；因此实例挂载时`resolveConstructorOptions`的入参为`Vue`，构建子组件时`Vue.extend`的入参是`VueComponent`。
 
 初始化一个只有一个组件的 Vue 实例：
 
@@ -84,12 +85,12 @@ function resolveConstructorOptions(Ctor) {
 // resolveConstructorOptions Vue true
 ```
 
-第一个打印是 `new Vue` 的参数合并，第二次打印是子组件 `Vue.extend`触发的参数合并，
-`Vue.extend`会构造一个特殊的`VueComponent`构造函数返回，并且会维护`VueComponent`的`super`属性；特殊性表现在多次传入相同的 options 只会复用一套构造函数；因此并不是 Vue；第三次打印的是`resolveConstructorOptions`函数中，子组件构造函数的 super 属性走进了条件判断，去获取 super 的属性再次调用 `resolveConstructorOptions`。入参为`vue`
+第一个打印是 `new Vue` 时的参数合并，第二次打印是子组件 `Vue.extend`触发的参数合并，
+`Vue.extend`会构造一个特殊的`VueComponent`构造函数并返回，内部维护了`VueComponent`的`super`属性；特殊性表现在多次传入相同的 options 对象（引用相同）会读取 options 对象上的缓存`VueComponent`；第三次打印的是`resolveConstructorOptions`函数中，子组件构造函数的 `super` 属性走进了条件判断，去获取`super`的`options`再次调用 `resolveConstructorOptions`，入参为构造函数`Vue`。
 
 ### 1.2、`Ctor.options`
 
-实例初始化时，`Vue.options`的维护在于`initGlobalAPI`函数 和 其他几条语句：
+Vue 实例初始化时，`Ctor.options`入参`Vue.options`，维护于`initGlobalAPI`函数和其他几条语句：
 
 - 添加组件，指令，过滤器集合
 - 添加内建组件 `KeepAlive`
@@ -127,7 +128,7 @@ extend(Vue.options.components, platformComponents);
 
 ### 1.3、superOptions !== cachedSuperOptions 的场景
 
-测试 case
+下面的 case 会触发这一场景
 
 ```js
 const mA = Vue.extend({
@@ -151,10 +152,11 @@ const app = new Vue({
 }).$mount("#app");
 ```
 
-首先使用`Vue.extend`创建`Vue`子类，`mA.constructor:VueComponent`.superOptions = Vue.options；Vue.mixin 调用了`mergeOptions`，返回了新的对象，因此走入了这个 case,下面为`Vue.mixin`的代码
+首先使用`Vue.extend`创建`Vue`子类`VueComponent`，`VueComponent.superOptions` 是 `Vue.options`；Vue.mixin 调用了`mergeOptions`返回了新的对象，因此走入了这个 case,下面为`Vue.mixin`的代码
 
 ```js
 Vue.mixin = function(mixin) {
+  // mergeOptions 返回一个新的合并对象
   this.options = mergeOptions(this.options, mixin);
   return this;
 };
@@ -204,7 +206,7 @@ function resolveModifiedOptions(Ctor) {
 }
 ```
 
-`sealedOptions`在`Vue.extend`中维护，是构建子类 VueComponent 时 merge 最终的 options
+`sealedOptions`在`Vue.extend`中维护，是构建子类 `VueComponent` 时缓存的最终 `options`
 
 ```js
 Vue.extend = function(extendOptions) {
@@ -217,18 +219,17 @@ Vue.extend = function(extendOptions) {
 };
 ```
 
-## 2 mergeOptions
+## 2、mergeOptions
 
 ```js
 function mergeOptions(parent, child, vm) {
   {
     checkComponents(child);
   }
-  // 如果是一个方法，应该是传入的VueComponent
+  // 如果是一个方法，应该是传入的VueComponent ？
   if (typeof child === "function") {
     child = child.options;
   }
-
   normalizeProps(child, vm);
   normalizeInject(child, vm);
   normalizeDirectives(child);
@@ -246,7 +247,6 @@ function mergeOptions(parent, child, vm) {
       }
     }
   }
-
   var options = {};
   var key;
   for (key in parent) {
@@ -298,7 +298,7 @@ function validateComponentName(name) {
 }
 ```
 
-校验组件的名称是否符合规范，并且组件的名称不能和内建组件、保留的标签名称一致
+校验组件的名称是否符合规范，并且组件的名称不能和内建组件、保留的标签名称冲突
 
 ### 2.2、normalizeProps 函数
 
@@ -346,7 +346,7 @@ function normalizeProps(options, vm) {
 }
 ```
 
-我们都知道 `options.props` 有两种方式传参，一种是数组，一种是对象，这个函数目的是输出一个标准化格式的 props。当输入的是`string[]`，数据格式化成`{[propName]:{type:null}}`，当输入的是对象，数据格式化为`{[propName]: inputValue }`
+我们都知道 `options.props` 有两种方式传参：数组和对象，这个函数目的是输出一个标准化格式的 props。当输入的是`string[]`，数据格式化成`{[propName]:{type:null}}`，当输入的是对象，数据格式化为`{[propName]: inputValue }`或者`{[propName]:{ type:inputValue}}。
 
 ```js
 // 输入为对象时的case
@@ -365,8 +365,6 @@ function normalizeProps(options, vm) {
   }
 }
 ```
-
-或者`{[propName]:{ type:inputValue}}。
 
 ### 2.3、normalizeInject 函数
 
@@ -423,7 +421,7 @@ options.inject = {
 };
 ```
 
-返回的对象至少都存在 key `from`，标识着可在注入内容中查找这个 key
+返回对象都会存在`from`属性，标识着在注入内容中查找这个 key
 
 ### 2.3、normalizeDirectives 函数
 
@@ -439,9 +437,9 @@ if (dirs) {
 }
 ```
 
-指令的处理比较简单，如果传入的是对象，比如我们自己定了`bind`，`update`，`unbind`之类的钩子函数，将不会格式化；如果传入的是函数，那么就将`bind`，`update`都指向这个函数。
+如果传入的是对象，`bind`，`update`，`unbind`等钩子函数均自定义提供，将不会格式化；如果传入的是函数，那么就将`bind`，`update`都指向这个函数。
 
-### 2.4 在子选项上应用扩展和混合的场景
+### 2.4、在子选项上应用扩展和混合的场景
 
 ```js
 if (!child._base) {
@@ -456,19 +454,20 @@ if (!child._base) {
 }
 ```
 
-如何传入的 options 存在 extends 或者 mixins，那么将子选项上的扩展和混合 merge 后再作为新的 parent，parent 里面会包含那个`extends`或者`mixins`
+如何传入的子`options`存在`extends`或者`mixins`，那么子选项上的`extends`或者`mixins`合并`parent`后再作为新的 parent
 
 ```js
-var myMixin = {
-  created: function() {
-    this.hello();
-  },
+var options = {
+  mixins: [
+    {
+      created: function() {
+        console.log(123);
+      },
+    },
+  ],
 };
-var Component = Vue.extend({
-  mixins: [myMixin],
-});
-
-var component = new Component(); // => "hello from mixin!"
+var Component = Vue.extend(options);
+var component = new Component(); // => 123
 ```
 
 ### 2.5、mergeField
@@ -495,10 +494,11 @@ function mergeOptions(parent, child, vm) {
 }
 ```
 
-`config.optionMergeStrategies`：vue 提供的自定义合并策略接口，并且其内置了各种 option 的默认的合并策略；上面的代码的意图是使用相关的合并策略方法对不同的`key`也就是`options`的`key`,进行合并父级的 merge 操作：
+`config.optionMergeStrategies`：vue 提供的自定义合并策略接口，并且其内置了各种选项默认的合并策略；上面代码的功能是使用相关的合并策略对不同的选项,进行 merge 操作：
 
-- 父组件的属性要进行合并
-- 子组件中父组件不存在的属性也要进行合并
+- 父选项的属性要全部进行合并
+- 子选项中父选项不存在的属性进行合并
+- 最终结果返回一个*新的对象*
 
 ### 2.6、合并策略
 
@@ -514,7 +514,9 @@ var defaultStrat = function(parentVal, childVal) {
 };
 ```
 
-#### 2.6.1、el 和 propsData 的合并策略 defaultStrat；如果传入，就直接使用此选项
+#### 2.6.1、el 和 propsData 的合并策略
+
+使用 defaultStrat；如果传入，就直接使用此选项
 
 #### 2.6.2、data、provide 的合并策略
 
@@ -561,17 +563,17 @@ strats.provide = mergeDataOrFn;
 
 分为两种情况：传入了实例 vm 和没有传入 vm
 
-- 传入了实例 vm
-  - 有子数据 mergeData 父子 data
-  - 无子数据 返回父 data
+- 传入实例 vm
+  - childVal 存在，mergeData(childVal, parentVal)
+  - childVal 不存在，返回 parentVal
 - 没有传入 vm
-  - 有父无子返回父 data
-  - 有子无父返回子 data
-  - 都有 mergeData 父子 data
+  - childVal 不存在，返回 parentVal
+  - parentVal 不存在，返回 childVal
+  - 都存在，mergeData(childVal, parentVal)
 
 mergeData 函数
 
-入参 to 是目标对象，这里传入的子 data,from 是父 data
+入参 to 为 childVal，from 为 parentVal
 
 ```js
 function mergeData(to, from) {
@@ -609,7 +611,10 @@ function mergeData(to, from) {
 }
 ```
 
-如果我们 `Vue.options.data` = `{all:1}`;那么所有的子组件都会插入一个响应式的`all`属性
+- 如果 parentVal 不存在，返回 childVal
+- parentVal[key]存在，childVal[key]不存在，在 childVal 中构建响应式属性 key
+
+例如我们 `Vue.options.data` = `{all:1}`;那么所有的子组件都会插入一个响应式的`all`属性
 
 #### 2.6.3、hook 的合并策略
 
@@ -636,7 +641,7 @@ function dedupeHooks(hooks) {
 }
 ```
 
-返回一个 hook 数组，并且 hook 数组内 hook 不重复，父 hook 在前，子 hook 在后，这意味着 mixins 进来的 hook 会比实例的 hook 先触发，因为子组件的 options.mixins 也会首先合并到父 options 中。
+返回一个 hook 数组，数组内 hook 不重复，父选项 hook 在前，子选项 hook 在后，这意味着混入的 hook 会比实例的 hook 先触发
 
 #### 2.6.4、components、directives、filters 的合并策略
 
@@ -705,8 +710,8 @@ strats.watch = function(parentVal, childVal, vm, key) {
 
 watch 的合并首先考虑了火狐浏览器的兼容性，避免传入`{}.watch`；其次是以`childVal`为目标迭代获取 `key`
 
-- 如果 childVal 的 key 在 parentVal 中 存在，那么 {key:[parentVal[key],childVal[key]]}
-- 否则，{key:[childVal[key]]}
+- 如果 childVal 的 key 存在 parentVal 中，那么 watch = {key:[parentVal[key],childVal[key]]}
+- 否则，watch = {key:[childVal[key]]}
 
 #### 2.6.6、props、methods、inject、computed 的合并策略
 
