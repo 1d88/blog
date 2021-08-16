@@ -514,7 +514,7 @@ var defaultStrat = function(parentVal, childVal) {
 };
 ```
 
-#### 2.6.1、el 和 propsData 的合并策略
+#### 2.6.1、el、propsData 的合并策略
 
 使用 defaultStrat；如果传入，就直接使用此选项
 
