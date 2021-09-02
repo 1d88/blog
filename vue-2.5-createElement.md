@@ -220,7 +220,62 @@ function _createElement(context, tag, data, children, normalizationType) {
 }
 ```
 
-### 3.1、`ALWAYS_NORMALIZE` OR `SIMPLE_NORMALIZE`
+### 3.1、 data 有效性校验
+
+如果传入的数据对象是响应式数据，那么返回空的虚拟节点。传入响应式的对象存在什么问题？https://github.com/vuejs/vue/issues/3276。 所以在数据对象上，在 render 函数中数据对象必须是一个新对象。
+
+```js
+if (isDef(data) && isDef(data.__ob__)) {
+  warn(
+    "Avoid using observed data object as vnode data: " +
+      JSON.stringify(data) +
+      "\n" +
+      "Always create fresh vnode data objects in each render!",
+    context
+  );
+  return createEmptyVNode();
+}
+```
+
+### 3.2、 is 覆盖 tag
+
+is 是一个特殊的属性，比如是动态的组件、或者将一个有约束性的标签，初始化成对应的组件 <tr is="com">
+https://cn.vuejs.org/v2/guide/components.html#%E5%8A%A8%E6%80%81%E7%BB%84%E4%BB%B6
+https://cn.vuejs.org/v2/guide/components.html#%E8%A7%A3%E6%9E%90-DOM-%E6%A8%A1%E6%9D%BF%E6%97%B6%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9
+这里通过判断 is，来初始化 tag 的值，如果 tag 是 `null` 或者 `undefined`，将会返回一个空的虚拟 dom 节点
+
+```js
+if (isDef(data) && isDef(data.is)) {
+  tag = data.is;
+}
+// 如果tag是个null或者undefined，那么返回一个空节点
+if (!tag) {
+  // in case of component :is set to falsy value
+  return createEmptyVNode();
+}
+```
+
+### 3.3、子节点归一化
+
+处理插槽作用域的情况，并且归一化子节点集合，子节点归一化分为两种情况：`ALWAYS_NORMALIZE` 或者 `SIMPLE_NORMALIZE`，通过这两种情况的处理，可以得到一个扁平化的标准数组。
+
+```js
+// support single function children as default scoped slot
+// 传入的children是一个函数，作为作用域插槽看待
+if (Array.isArray(children) && typeof children[0] === "function") {
+  data = data || {};
+  data.scopedSlots = { default: children[0] };
+  children.length = 0;
+}
+// 归一化children 函数，返回一个扁平的数组。
+if (normalizationType === ALWAYS_NORMALIZE) {
+  children = normalizeChildren(children);
+} else if (normalizationType === SIMPLE_NORMALIZE) {
+  children = simpleNormalizeChildren(children);
+}
+```
+
+### 3.4、`ALWAYS_NORMALIZE` OR `SIMPLE_NORMALIZE`
 
 normalizationType 可以是`ALWAYS_NORMALIZE`或者`SIMPLE_NORMALIZE`，二者的区别在于
 
@@ -335,7 +390,63 @@ function normalizeArrayChildren(children, nestedIndex) {
 }
 ```
 
-### 3.2、registerDeepBindings
+### 3.5、根据 tag 类型生成节点
+
+- 当 tag 是一个 `string` 类型，判断了是三种情况
+
+  - 属于 w3c 规范的标签，比如`div`、`span`，生成对应标签的虚拟 dom
+  - 当前选项的`components`对象或者`components`原型上存在这个 tag，生成组件
+  - 其它情况，生成自定义标签对应的虚拟 dom
+
+```js
+var Ctor;
+// $vnode 和 $vnode.ns是否存在 或者 ( SVG or MathML)
+ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
+// isHTMLTag(tag) || isSVG(tag)，是不是 html 标签或者 svg 标签
+if (config.isReservedTag(tag)) {
+  // platform built-in elements
+  // 提示在html标签上面，是禁止使用.native修饰符的，只有在组件上面可以v-on.native
+  if (isDef(data) && isDef(data.nativeOn)) {
+    warn(
+      "The .native modifier for v-on is only valid on components but it was used on <" +
+        tag +
+        ">.",
+      context
+    );
+  }
+  // 构建当前的节点
+  vnode = new VNode(
+    // (_) => _
+    config.parsePlatformTagName(tag),
+    data,
+    children,
+    undefined,
+    undefined,
+    context
+  );
+} else if (
+  // 如果 data 不存在，或者data.pre不存在，
+  (!data || !data.pre) &&
+  // 当前 tag 所对应的 context.$options.compontents 存在构造函数
+  isDef((Ctor = resolveAsset(context.$options, "components", tag)))
+  // 那么这时候会调用生成一个组件
+) {
+  // component
+  vnode = createComponent(Ctor, data, context, children, tag);
+} else {
+  // unknown or unlisted namespaced elements
+  // 未知 和 没有列出的 元素
+  // check at runtime because it may get assigned a namespace when its parent normalizes children
+  // 在运行时检验它，因为在父级 归一化 children的时候 它会被断言一个命名空间
+  vnode = new VNode(tag, data, children, undefined, undefined, context);
+}
+```
+
+- 当 tag 是一个构造函数，生成一个组件
+
+### 3.6、registerDeepBindings
+
+修复 bug：当使用`transition`时候，视图不会更新。所以重新绑定 style 和 class
 
 ```js
 // ref #5318
