@@ -11,20 +11,21 @@
     <div id="app"></div>
     <script>
       const child = Vue.extend({
-        render(h) {
-          return h("div", [
-            111,
-            h("span", { staticClass: "c" }, "你好"),
-            h("span", { staticClass: "c" }, "你好"),
-            [h("span", { staticClass: "c" }, "你好")],
-          ]);
+        data() {
+          return {
+            a: 111,
+          };
+        },
+        template: `<div><span v-once><slot name="a"></slot><a v-once><slot name="b"></slot></a></span></div>`,
+        mounted() {
+          console.log(this);
         },
       });
       const app = new Vue({
         components: {
           child,
         },
-        template: `<div><child></child></div>`,
+        template: `<div><child><template v-slot:a>dd</template><template v-slot:b>11</template></child></div>`,
       }).$mount("#app");
     </script>
   </body>

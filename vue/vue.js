@@ -2472,7 +2472,6 @@
   }
 
   function normalizeArrayChildren(children, nestedIndex) {
-    debugger;
     var res = [];
     var i, c, lastIndex, last;
     for (i = 0; i < children.length; i++) {

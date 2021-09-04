@@ -746,10 +746,11 @@ props、methods、inject、computed 的合并策略，首先拷贝 parentVal,然
 - 如果是入参 `Vue`，返回通过 `initGlobalAPI`函数维护的 options；
 - 如果是 `Vue` 子类 `VueComponent`，还会考虑在调用 `Vue.extend` 之后，再次调用 `Vue.mixins`(调用了`mergeOptions`重新覆盖了 `Vue.options`),缓存父级 option 和真实父级 option 不一致的问题；
 
-`mergeOptions`主要用来合并参数，入参 parentOption，childOption 和 vm.parentOption 是构造函数 Vue 或者 Vue 子类 VueComponent 的属性 (options`Vue.options | VueComponent.options`)，是用来初始化 Vue 组件的基本选项配置。函数返回一个合并之后的 options；合并参数带来的功能是父类构造选项会直接影响子类的构造选项，实现 mixins、公共内建组件、全局组件、指令、过滤器、注入等功能。
+`mergeOptions`主要用来合并参数，入参 parentOption，childOption 和 vm；parentOption 是构造函数 Vue 或者 Vue 子类 VueComponent 的属性 (options`Vue.options | VueComponent.options`)，childOption 是当前的属性，用来初始化 Vue 组件的基本选项配置。函数返回一个合并之后的 options；合并参数带来的功能是父类构造选项会直接影响子类的构造选项，实现 mixins、公共内建组件、全局组件、指令、过滤器、注入等功能。
 
 `Vue.prototype._init`使用`mergeOptions`函数生成了`vm.$options`
 
 ## 问题：
 
 1.  官网说**记住全局注册的行为必须在根 Vue 实例 (通过 new Vue) 创建之前发生**，为什么？
+    如果在初始化 Vue 之后再进行全局的注册行为，会造成注册行为失效，并且内部会进行多余的参数合并
