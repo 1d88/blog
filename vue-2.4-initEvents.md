@@ -125,7 +125,7 @@ function eventsMixin(Vue) {
 }
 ```
 
-`Vue`自定义事件使用了发布订阅模式，自定义事件维护在`vm._events`。
+`Vue`自定义事件使用了发布订阅模式，将事件维护在`vm._events`。
 
 ```js
 vm._events = {
@@ -333,3 +333,7 @@ function cached(fn) {
 ### 2.3、句柄异常的捕捉
 
 `invokeWithErrorHandling`包含了 `try ... catch ...`代码块，来捕捉**同步**fn 执行抛出的异常，同时如果 fn 返回一个`Promise`实例(存在异步代码)，使用`Promise.prototype.catch`来捕捉 fn 运行中的异常。
+
+## 3、总结
+
+`eventsMixin`函数初始化了`Vue`的四个原型方法：`$on`、`$off`、`$once`、`$emit`，使用了典型的发布订阅模式

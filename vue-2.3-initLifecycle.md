@@ -180,3 +180,12 @@ function initLifecycle(vm) {
   vm._isBeingDestroyed = false;
 }
 ```
+
+## 3、总结
+
+`lifecycleMixin`主要初始化了和生命周期相关的三个原型方法：`_update`、`$forceUpdate`、`$destroy`。
+
+`_update`方法内部调用了 `__patch__`，`__patch__`的注入跟调用的平台有关，在浏览器端使用了参考`snabbdom`
+的 diff 算法。`$forceUpdate`内部还是再次调用了渲染监听器的`update`方法来重新计算一次。`$destroy`方法主要还是解除当前实例的相关引用，避免造成内存的泄漏。调用销毁的两个钩子函数，通用业务开发者做一些必要的清理工作。
+
+`initLifecycle`主要初始化了和生命周期相关的各种实例属性，包括`vue`实例内部使用的属性字段。

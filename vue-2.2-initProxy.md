@@ -136,3 +136,7 @@ var initProxy;
 （相关代码：https://github.com/vuejs/component-compiler-utils/blob/8b0da745c5a4c7a07b3b88560a1d1cb3c00a9d32/lib/compileTemplate.ts#L170）
 
 如果是生产模式，此时不再会有访问`vm`属性异常而抛出的警告，取而代之的是使用`in`操作符去判断一个属性的时候，会抛出警告。
+
+## 总结
+
+`initProxy`主要的工作做错误的提示工作。在开发模式下，会捕捉错误属性的访问并且提示；在生产模式下使用`in`会触发和在开发模式下`get`相同的效果。是否开启代理错误检验，和浏览器的支持情况相关，即使浏览器不支持代理特性，也不会影响正常的功能。

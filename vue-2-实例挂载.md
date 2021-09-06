@@ -246,7 +246,7 @@ Sub.sealedOptions = extend({}, Sub.options);
 
 最后返回这个构造函数`VueComponent`
 
-## 4、Vue.prototype.\_init 函数大概
+## 4、Vue.prototype.\_init 函数
 
 在 Vue 和 VueComponent 的构造函数中都调用了`_init`方法来实例化一个组件。`_init`方法完成了从初始化到挂载到真实 dom 节点这一过程。
 
