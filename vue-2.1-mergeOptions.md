@@ -500,7 +500,7 @@ function mergeOptions(parent, child, vm) {
 - 子选项中父选项不存在的属性进行合并
 - 最终结果返回一个*新的对象*
 
-### 2.6、合并策略
+## 3、合并策略
 
 让我们打印下 `config.optionMergeStrategies`
 
@@ -514,11 +514,11 @@ var defaultStrat = function(parentVal, childVal) {
 };
 ```
 
-#### 2.6.1、el、propsData 的合并策略
+### 3.1、el、propsData 的合并策略
 
 使用 defaultStrat；如果传入，就直接使用此选项
 
-#### 2.6.2、data、provide 的合并策略
+### 3.2、data、provide 的合并策略
 
 ```js
 function mergeDataOrFn(parentVal, childVal, vm) {
@@ -616,7 +616,7 @@ function mergeData(to, from) {
 
 例如我们 `Vue.options.data` = `{all:1}`;那么所有的子组件都会插入一个响应式的`all`属性
 
-#### 2.6.3、hook 的合并策略
+### 3.3、hook 的合并策略
 
 ```js
 function mergeHook(parentVal, childVal) {
@@ -643,7 +643,7 @@ function dedupeHooks(hooks) {
 
 返回一个 hook 数组，数组内 hook 不重复，父选项 hook 在前，子选项 hook 在后，这意味着混入的 hook 会比实例的 hook 先触发
 
-#### 2.6.4、components、directives、filters 的合并策略
+### 3.4、components、directives、filters 的合并策略
 
 ```js
 function mergeAssets(parentVal, childVal, vm, key) {
@@ -661,7 +661,7 @@ function mergeAssets(parentVal, childVal, vm, key) {
 
 主要是创建一个以父（components、directives、filters）为原型的对象，然后将子（components、directives、filters）添加到这个对象，如果属性名相同会遮盖掉原型上的方法，但是内置的 components、directives 名称不允许重复。
 
-#### 2.6.5、watch 的合并策略
+### 3.5、watch 的合并策略
 
 ```js
 strats.watch = function(parentVal, childVal, vm, key) {
@@ -713,7 +713,7 @@ watch 的合并首先考虑了火狐浏览器的兼容性，避免传入`{}.watc
 - 如果 childVal 的 key 存在 parentVal 中，那么 watch = {key:[parentVal[key],childVal[key]]}
 - 否则，watch = {key:[childVal[key]]}
 
-#### 2.6.6、props、methods、inject、computed 的合并策略
+### 3.6、props、methods、inject、computed 的合并策略
 
 ```js
 strats.props = strats.methods = strats.inject = strats.computed = function(

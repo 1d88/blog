@@ -1,389 +1,227 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([
-  ["chunk-01b68e5c"],
+  ["chunk-3a65021e"],
   {
-    /***/ "6114": /***/ function(
+    /***/ "07e8": /***/ function(
       module,
       __webpack_exports__,
       __webpack_require__
     ) {
       "use strict";
-      // ESM COMPAT FLAG
-      __webpack_require__.r(__webpack_exports__);
 
-      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"7e206c3e-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/creator/views/income/index.vue?vue&type=template&id=64bf90dd&scoped=true&
+      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"3a672da0-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/filter-group/index.vue?vue&type=template&id=1befa301&scoped=true&
       var render = function() {
         var _vm = this;
         var _h = _vm.$createElement;
         var _c = _vm._self._c || _h;
-        return _c("div", { staticClass: "pageincome" }, [
-          _c("div", {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.isapp && _vm.ischeckLver,
-                expression: "isapp && ischeckLver",
+        return _c(
+          "div",
+          {
+            staticClass: "filter",
+            on: {
+              click: function($event) {
+                if ($event.target !== $event.currentTarget) {
+                  return null;
+                }
+                return _vm.$emit("close");
               },
-            ],
-            staticClass: "apptop",
-          }),
-          _c("img", {
-            attrs: {
-              src:
-                "https://static.soyoung.com/sy-pre/20220611-1591852200702.png",
-              width: "100%",
             },
-          }),
-          _c("div", { staticClass: "main" }, [
-            _c("div", { staticClass: "title" }, [_vm._v("你将收获什么？")]),
-            _vm._m(0),
-            _vm._m(1),
-            _vm.issure
-              ? _c(
-                  "div",
-                  { staticClass: "botton ccc", on: { click: _vm.totoast } },
-                  [_vm._v("申请加入")]
-                )
-              : _c("div", { staticClass: "botton", on: { click: _vm.ask } }, [
-                  _vm._v("申请加入"),
-                ]),
-          ]),
-          _c(
-            "div",
-            {
-              directives: [
-                {
-                  name: "show",
-                  rawName: "v-show",
-                  value: _vm.isShow,
-                  expression: "isShow",
-                },
-              ],
-              staticClass: "layer",
-            },
-            [
+          },
+          [
+            _c("div", { staticClass: "filter__nav" }, [
               _c(
                 "div",
-                { staticClass: "foot", class: _vm.isShowanmiate ? "show" : "" },
+                {
+                  staticClass: "filter__nav--item",
+                  class: { "is-active": _vm.selectedSort === "city" },
+                  on: {
+                    click: function($event) {
+                      return _vm.$emit("select-city");
+                    },
+                  },
+                },
                 [
-                  _c("img", {
-                    attrs: {
-                      src:
-                        "https://static.soyoung.com/sy-pre/2020061104-1591855800720.png",
-                    },
-                  }),
-                  _c("div", { staticClass: "title" }, [_vm._v("已成功加入")]),
-                  _c("p", [_vm._v("创作激励收益从加入后发布内容开始计算")]),
                   _c(
-                    "div",
+                    "span",
                     {
-                      staticClass: "botton",
-                      class: _vm.isIphoneX ? "marginBottom" : "",
-                      on: { click: _vm.go },
+                      staticClass: "filter__item--text",
+                      on: {
+                        click: function($event) {
+                          if ($event.target !== $event.currentTarget) {
+                            return null;
+                          }
+                          return _vm.$emit("close");
+                        },
+                      },
                     },
-                    [_vm._v("知道啦")]
+                    [_vm._v(_vm._s(_vm.cityInfo.name))]
                   ),
                 ]
               ),
-            ]
-          ),
-        ]);
+              _c(
+                "div",
+                {
+                  staticClass: "filter__nav--item",
+                  class: { "is-active": _vm.selectedSort === "sort" },
+                  on: {
+                    click: function($event) {
+                      return _vm.$emit("select-sort");
+                    },
+                  },
+                },
+                [
+                  _c(
+                    "span",
+                    {
+                      staticClass: "filter__item--text",
+                      on: {
+                        click: function($event) {
+                          if ($event.target !== $event.currentTarget) {
+                            return null;
+                          }
+                          return _vm.$emit("close");
+                        },
+                      },
+                    },
+                    [_vm._v(_vm._s(_vm.sortInfo.name))]
+                  ),
+                ]
+              ),
+            ]),
+            _c(
+              "div",
+              { staticClass: "filter__main" },
+              [
+                _vm.selectedSort === "city"
+                  ? _c("city", {
+                      attrs: { list: _vm.list.city, cityInfo: _vm.cityInfo },
+                      on: { getSelected: _vm.getSelected },
+                    })
+                  : _vm._e(),
+                _vm.selectedSort === "sort"
+                  ? _c(
+                      "ul",
+                      { staticClass: "filter__smart" },
+                      [
+                        _vm._l(_vm.list.sortNew, function(item) {
+                          return [
+                            item.name !== "离我最近"
+                              ? _c(
+                                  "li",
+                                  {
+                                    key: item.name,
+                                    staticClass: "filter__smart--item",
+                                    class: {
+                                      "is-active":
+                                        +_vm.sortInfo.sort === +item.sort,
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.getSort(item);
+                                      },
+                                    },
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n          " +
+                                        _vm._s(item.name) +
+                                        "\n        "
+                                    ),
+                                  ]
+                                )
+                              : _vm._e(),
+                          ];
+                        }),
+                      ],
+                      2
+                    )
+                  : _vm._e(),
+              ],
+              1
+            ),
+          ]
+        );
       };
-      var staticRenderFns = [
-        function() {
-          var _vm = this;
-          var _h = _vm.$createElement;
-          var _c = _vm._self._c || _h;
-          return _c("ul", [
-            _c("li", [
-              _c("img", {
-                attrs: {
-                  src:
-                    "https://static.soyoung.com/sy-pre/2020061101-1591855800720.png",
-                },
-              }),
-              _c("p", [_vm._v("内容浏览量收益")]),
-              _c("span", [_vm._v("高浏览带来高收入！")]),
-            ]),
-            _c("li", [
-              _c("img", {
-                attrs: {
-                  src:
-                    "https://static.soyoung.com/sy-pre/2020061102-1591855800720.png",
-                },
-              }),
-              _c("p", [_vm._v("更多流量奖励")]),
-              _c("span", [_vm._v("内容互动赢取更多流量")]),
-            ]),
-            _c("li", [
-              _c("img", {
-                attrs: {
-                  src:
-                    "https://static.soyoung.com/sy-pre/2020061103-1591855800720.png",
-                },
-              }),
-              _c("p", [_vm._v("新氧新星指日可待")]),
-              _c("span", [_vm._v("创作指引，榜单活动")]),
-            ]),
-          ]);
-        },
-        function() {
-          var _vm = this;
-          var _h = _vm.$createElement;
-          var _c = _vm._self._c || _h;
-          return _c("div", { staticClass: "foot" }, [
-            _c("p", [
-              _vm._v("\n        加入条件\n        "),
-              _c("span", [_vm._v("以下条件满足其中一项即可申请加入")]),
-            ]),
-            _c("p", [_vm._v("1、新氧达人：90天通过首页审核内容数>=5")]),
-            _c("p", [
-              _vm._v("2、普通用户：粉丝数>=50，90天内通过首页审核内容数>=3"),
-            ]),
-          ]);
-        },
-      ];
+      var staticRenderFns = [];
 
-      // CONCATENATED MODULE: ./src/pages/creator/views/income/index.vue?vue&type=template&id=64bf90dd&scoped=true&
+      // CONCATENATED MODULE: ./src/components/filter-group/index.vue?vue&type=template&id=1befa301&scoped=true&
 
-      // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.split.js
-      var es6_regexp_split = __webpack_require__("28a5");
+      // EXTERNAL MODULE: ./src/components/filter-group/city.vue + 4 modules
+      var city = __webpack_require__("d12a");
 
-      // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.regexp.replace.js
-      var es6_regexp_replace = __webpack_require__("a481");
-
-      // EXTERNAL MODULE: ./src/utils/send-msg-to-app.js
-      var send_msg_to_app = __webpack_require__("52a0");
-
-      // EXTERNAL MODULE: ./src/api/creator.js
-      var creator = __webpack_require__("db64");
-
-      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/creator/views/income/index.vue?vue&type=script&lang=js&
-
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-
-      /* harmony default export */
-
-      var incomevue_type_script_lang_js_ = {
+      /* harmony default export */ var filter_groupvue_type_script_lang_js_ = {
+        name: "filter-group",
+        props: ["selectionSource", "selectedSort", "cityInfo", "sortInfo"],
         data: function data() {
           return {
-            isIphoneX: this.$utils.isIphoneX(),
-            isapp: this.$utils.isApp(),
-            ischeckLver: false,
-            isShow: false,
-            isShowanmiate: false,
-            issure: true,
-            ismcn_sub: false,
+            list: {}, //所有筛选项数据
           };
         },
-        methods: {
-          ask: function ask() {
-            var _this = this;
-
-            this.$report("event", {
-              event_name: "sy_app_post_creator_center:allowance_apply_click",
-            });
-            Object(creator["b" /* applyfor */])({
-              sm_device_id: this.$route.query.sm_device_id,
-            }).then(function(data) {
-              if (data.errorCode == 0) {
-                _this.isShow = true;
-                _this.ismcn_sub =
-                  data.responseData.ismcn_sub == 1 ? true : false;
-                setTimeout(function() {
-                  _this.isShowanmiate = true;
-                }, 100);
-
-                if (_this.isapp) {
-                  send_msg_to_app["a" /* default */].toApp(
-                    "refreshNativePage",
-                    {}
-                  );
-                }
-              } else {
-                _this.$toast(data.errorMsg);
-              }
-            });
-          },
-          go: function go() {
-            if (this.ismcn_sub) {
-              this.$router.replace({
-                path: "/income/subAccount",
-              });
-            } else {
-              this.$router.replace({
-                path: "/income/main",
-              });
-            }
-          },
-          checkLver: function checkLver() {
-            var level = window.globalInfo.lver.split(".");
-            var flag = false;
-
-            if (level[0] > 8) {
-              flag = true;
-            } else if (level[0] == 8) {
-              if (level[1] >= 3) {
-                flag = true;
-              } else {
-                flag = false;
-              }
-            } else {
-              flag = false;
-            }
-
-            return flag;
-          },
-          totoast: function totoast() {
-            //Bridge.toApp("refreshNativePage", {});
-            this.$toast("暂不满足加入条件，完成后再来试试~");
-          },
-        },
         created: function created() {
-          this.$report("page", {
-            page_name: "sy_app_post_creator_center:allowance_apply_page",
-          });
+          this.list = this.selectionSource;
         },
-        mounted: function mounted() {
-          var _this2 = this;
-
-          this.isapp = this.$utils.isApp();
-          this.ischeckLver = this.checkLver();
-          Object(creator["e" /* checkrule */])().then(function(data) {
-            if (data.errorCode == 0) {
-              _this2.issure = false;
-            } else if (data.errorCode == -1) {
-              var url = window.location.href;
-
-              if (_this2.$utils.isApp()) {
-                window.location.href = "app.soyoung://login?callback=".concat(
-                  url
-                );
-              } else {
-                _this2.$router.push({
-                  path: "/login?back=" + encodeURIComponent("/income/index"),
-                });
-              }
-            } else {
-              if (data.errorMsg) {
-                _this2.$toast(data.errorMsg);
-              }
-            }
-          });
-
-          if (this.ischeckLver && this.isapp) {
-            // Bridge.toApp("setNavigationBar", {
-            //   transition: true, //滚动是否透明
-            //   type: "2", // 2
-            //   fontColor: "0xffffff",
-            //   bgColor: "0xffffff",
-            //   fontColorUpGlide: "0x000000"
-            // });
-            send_msg_to_app["a" /* default */].toApp("configNavigationBar", {
-              transform_type: 1,
-              // 0 默认无沉浸式 1 沉浸式
-              transform_offset: 88,
-              // 过渡偏移量 100
-              background_view: {
-                background_color: "1fdcc6",
-              },
-              left_view: {
-                transparency_color: "ffffff",
-                un_transparency_color: "ffffff",
-              },
-              title_view: {
-                type: 0,
-                // 0 显示标题 1search
-                transparency_color: "ffffff",
-                un_transparency_color: "ffffff",
-                title: "创作激励",
-              },
-            });
-          }
+        methods: {
+          // 获取已选城市
+          getSelected: function getSelected(params) {
+            this.$emit("renderNewChange", "city", params);
+          },
+          // 获取智能筛选
+          getSort: function getSort(params) {
+            this.$emit("renderNewChange", "sort", params); // this.smartSort = params.sort || 0;
+          },
+        },
+        components: {
+          city: city["a" /* default */],
         },
       };
-      // CONCATENATED MODULE: ./src/pages/creator/views/income/index.vue?vue&type=script&lang=js&
-      /* harmony default export */ var views_incomevue_type_script_lang_js_ = incomevue_type_script_lang_js_;
-      // EXTERNAL MODULE: ./src/pages/creator/views/income/index.vue?vue&type=style&index=0&id=64bf90dd&lang=less&scoped=true&
-      var incomevue_type_style_index_0_id_64bf90dd_lang_less_scoped_true_ = __webpack_require__(
-        "f1aa"
+      // CONCATENATED MODULE: ./src/components/filter-group/index.vue?vue&type=script&lang=js&
+      /* harmony default export */ var components_filter_groupvue_type_script_lang_js_ = filter_groupvue_type_script_lang_js_;
+      // EXTERNAL MODULE: ./src/components/filter-group/index.vue?vue&type=style&index=0&id=1befa301&lang=less&scoped=true&
+      var filter_groupvue_type_style_index_0_id_1befa301_lang_less_scoped_true_ = __webpack_require__(
+        "d4ab"
       );
 
       // EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
       var componentNormalizer = __webpack_require__("2877");
 
-      // CONCATENATED MODULE: ./src/pages/creator/views/income/index.vue
+      // CONCATENATED MODULE: ./src/components/filter-group/index.vue
 
       /* normalize component */
 
       var component = Object(componentNormalizer["a" /* default */])(
-        views_incomevue_type_script_lang_js_,
+        components_filter_groupvue_type_script_lang_js_,
         render,
         staticRenderFns,
         false,
         null,
-        "64bf90dd",
+        "1befa301",
         null
       );
 
-      /* harmony default export */ var income = (__webpack_exports__[
-        "default"
+      /* harmony default export */ var filter_group = (__webpack_exports__[
+        "a"
       ] = component.exports);
 
       /***/
     },
 
-    /***/ "7914": /***/ function(module, exports, __webpack_require__) {
-      // extracted by mini-css-extract-plugin
+    /***/ "0843": /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_1_id_27f76de3_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "4e34"
+      );
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_1_id_27f76de3_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_1_id_27f76de3_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__
+      );
+      /* unused harmony reexport * */
+
       /***/
     },
 
-    /***/ db64: /***/ function(
+    /***/ "0b92": /***/ function(
       module,
       __webpack_exports__,
       __webpack_require__
@@ -393,317 +231,1140 @@
         __webpack_exports__,
         "c",
         function() {
-          return cancelGetContentListByParams;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "d",
-        function() {
-          return checkPhoneNumber;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "h",
-        function() {
-          return getAuthConfirmInfo;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "f",
-        function() {
-          return confirmApply;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "i",
-        function() {
-          return getCollegeIndex;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "j",
-        function() {
-          return getCollegeList;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "k",
-        function() {
-          return getContentListByParams;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "g",
-        function() {
-          return deletePostByPostId;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "r",
-        function() {
-          return getSummary;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "q",
-        function() {
-          return getPostlist;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "p",
-        function() {
-          return getPostdetail;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "l",
-        function() {
-          return getMotivateSummary;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "n",
-        function() {
-          return getMotivateUserPostSummary;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "m",
-        function() {
-          return getMotivateUserPostDailyAmount;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "o",
-        function() {
-          return getMotivatepostlistAmount;
+          return getFilterData;
         }
       );
       /* harmony export (binding) */ __webpack_require__.d(
         __webpack_exports__,
         "a",
         function() {
-          return GetMcnInfo;
+          return RepeatPurchaseInit;
         }
       );
       /* harmony export (binding) */ __webpack_require__.d(
         __webpack_exports__,
         "b",
         function() {
-          return applyfor;
-        }
-      );
-      /* harmony export (binding) */ __webpack_require__.d(
-        __webpack_exports__,
-        "e",
-        function() {
-          return checkrule;
+          return RepeatPurchaseList;
         }
       );
       /* harmony import */ var _http__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
         "c1fb"
       );
-      /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
-        "bc3a"
-      );
-      /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/ __webpack_require__.n(
-        axios__WEBPACK_IMPORTED_MODULE_1__
-      );
-      // /super/getUserCondition?authentication_type=1
+      // http://syapi.sy.soyoung.com/project/424/interface/api/cat_5141
+      // 获取筛选项数据 如： 城市、智能排序
 
-      var URL_AUTH_CHECK = "/mcnManage/applyAuth";
-      var URL_AUTH_INFO = "/mcnManage/getAuthInfo";
-      var URL_AUTH_CONFIRM = "/mcnManage/acceptAuth";
-      var URL_MANAGEMENT = "/diary/contentlist";
-      var URL_DELETE_POST = "/diary/handlePost";
-      var URL_DATACENTER_SUMMARY = "/datacenter/summary";
-      var URL_DATACENTER_POSTLIST = "/datacenter/postlist";
-      var URL_DATACENTER_POSTDETAIL = "/datacenter/postdetail";
-      var URL_MOTIVATE_SUMMARY = "/motivate/summary";
-      var URL_MOTIVATE_USERPOSTSUMMARY = "/motivate/userPostSummary";
-      var URL_MOTIVATE_USERPOSTDAILYAMOUNT = "/motivate/userPostDailyAmount";
-      var URL_MOTIVATE_POSTLISTAMOUNT = "/motivate/postlistAmount";
-      var URL_MOTIVATE_GETMCNINFO = "/motivate/GetMcnInfo";
-      var CancelToken =
-        axios__WEBPACK_IMPORTED_MODULE_1___default.a.CancelToken;
-      var cancelGetContentListByParams; // 添加你想认证的手机号码
-
-      var checkPhoneNumber = function checkPhoneNumber(params) {
+      var getFilterData = function getFilterData(params) {
         return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
           data: params,
-          url: URL_AUTH_CHECK,
-          method: "post",
-        });
-      }; // 获取认证页面的基本信息
-
-      var getAuthConfirmInfo = function getAuthConfirmInfo(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_AUTH_INFO,
-          method: "post",
-        });
-      }; // 被邀请者的确认接口
-
-      var confirmApply = function confirmApply(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_AUTH_CONFIRM,
-          method: "post",
-        });
-      }; // 创作者学院 index
-
-      var getCollegeIndex = function getCollegeIndex(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: "/creatorsCollege/getCollegeIndex",
-          method: "post",
-        });
-      }; // 创作者学院 list
-
-      var getCollegeList = function getCollegeList(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: "/creatorsCollege/getCollegeList",
-          method: "post",
-        });
-      }; // 获取内容列表数据
-
-      var getContentListByParams = function getContentListByParams(params) {
-        // 频繁点击switch类按钮的时候，如果再网速不好的情况下，会阻塞很多次请求，堆积的结果返回会造成不符合的预期；
-        // 所以所有的switch操作，都会取消当前的请求，并准备进入下次请求；如果是下拉加载更多的操作，我们期望的是等待，而不是取消请求
-        cancelGetContentListByParams && cancelGetContentListByParams();
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          method: "post",
-          url: URL_MANAGEMENT,
-          cancelToken: new CancelToken(function executor(c) {
-            cancelGetContentListByParams = c;
-          }),
-        });
-      }; // 获取内容列表数据
-
-      var deletePostByPostId = function deletePostByPostId(post_id) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: {
-            post_id: post_id,
-          },
-          method: "post",
-          url: URL_DELETE_POST,
-        });
-      }; // 数据中心 概览
-
-      var getSummary = function getSummary(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_DATACENTER_SUMMARY,
-          method: "post",
-        });
-      }; // 数据中心 帖子列表 1:图文 2:视频
-
-      var getPostlist = function getPostlist(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_DATACENTER_POSTLIST,
-          method: "post",
-        });
-      }; // 帖子数据详情
-
-      var getPostdetail = function getPostdetail(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_DATACENTER_POSTDETAIL,
+          url: "/itemcity/product",
+          baseURL: "/",
           method: "post",
         });
       };
-      var getMotivateSummary = function getMotivateSummary(params) {
+      var RepeatPurchaseInit = function RepeatPurchaseInit(params) {
         return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
           data: params,
-          url: URL_MOTIVATE_SUMMARY,
+          url: "/RepeatPurchase/Index",
+          baseURL: "/",
           method: "post",
         });
       };
-      var getMotivateUserPostSummary = function getMotivateUserPostSummary(
-        params
-      ) {
+      var RepeatPurchaseList = function RepeatPurchaseList(params) {
         return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
           data: params,
-          url: URL_MOTIVATE_USERPOSTSUMMARY,
+          url: "/RepeatPurchase/ProductList",
+          baseURL: "/",
           method: "post",
-        });
-      };
-      var getMotivateUserPostDailyAmount = function getMotivateUserPostDailyAmount(
-        params
-      ) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          url: URL_MOTIVATE_USERPOSTDAILYAMOUNT,
-          method: "post",
-        });
-      };
-      var getMotivatepostlistAmount = function getMotivatepostlistAmount(
-        params
-      ) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          method: "post",
-          url: URL_MOTIVATE_POSTLISTAMOUNT,
-        });
-      };
-      var GetMcnInfo = function GetMcnInfo(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          method: "post",
-          url: URL_MOTIVATE_GETMCNINFO,
-        });
-      };
-      var applyfor = function applyfor(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          // method: 'post',
-          url: "/motivate/applyfor",
-        });
-      };
-      var checkrule = function checkrule(params) {
-        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
-          data: params,
-          // method: 'post',
-          url: "/motivate/checkrule",
         });
       };
 
       /***/
     },
 
-    /***/ f1aa: /***/ function(
+    /***/ "3ddb": /***/ function(module, exports, __webpack_require__) {
+      // extracted by mini-css-extract-plugin
+      /***/
+    },
+
+    /***/ "4e34": /***/ function(module, exports, __webpack_require__) {
+      // extracted by mini-css-extract-plugin
+      /***/
+    },
+
+    /***/ "5a61": /***/ function(module) {
+      module.exports = JSON.parse(
+        '{"newuserProduct":[{"city_name":"重庆市","ext":[],"hospital_name":"重庆五洲整形美容","img_cover":"","order_cnt":"0","pid":"1189","price_online":"11","price_origin":"200","title":"【玻尿酸导入】五洲整形<手术预约订金>专用项目"},{"city_name":"重庆市","ext":[],"hospital_name":"重庆五洲整形美容","img_cover":"","order_cnt":"0","pid":"1189","price_online":"11","price_origin":"200","title":"【玻尿酸导入】五洲整形<手术预约订金>专用项目"},{"city_name":"重庆市","ext":[],"hospital_name":"重庆五洲整形美容","img_cover":"","order_cnt":"0","pid":"1189","price_online":"11","price_origin":"200","title":"【玻尿酸导入】五洲整形<手术预约订金>专用项目"},{"city_name":"重庆市","ext":[],"hospital_name":"重庆五洲整形美容","img_cover":"","order_cnt":"0","pid":"1189","price_online":"11","price_origin":"200","title":"【玻尿酸导入】五洲整形<手术预约订金>专用项目"}],"hotProduct":[{"hospital_name":"xxxx","img_cover":"","lable":"安心购","order_cnt":"","pid":"","price_online":"","price_origin":"","title":"","type":"product"},{"hospital_name":"xxxx","img_cover":"","lable":"安心购","order_cnt":"","pid":"","price_online":"","price_origin":"","title":"","type":"product"},{"hospital_name":"xxxx","img_cover":"","lable":"安心购","order_cnt":"","pid":"","price_online":"","price_origin":"","title":"","type":"product"},{"hospital_name":"xxxx","img_cover":"","lable":"安心购","order_cnt":"","pid":"","price_online":"","price_origin":"","title":"","type":"product"}]}'
+      );
+
+      /***/
+    },
+
+    /***/ "5d54": /***/ function(module, exports, __webpack_require__) {
+      // extracted by mini-css-extract-plugin
+      /***/
+    },
+
+    /***/ "6dea": /***/ function(module, exports, __webpack_require__) {
+      // extracted by mini-css-extract-plugin
+      /***/
+    },
+
+    /***/ "8e6e": /***/ function(module, exports, __webpack_require__) {
+      // https://github.com/tc39/proposal-object-getownpropertydescriptors
+      var $export = __webpack_require__("5ca1");
+      var ownKeys = __webpack_require__("990b");
+      var toIObject = __webpack_require__("6821");
+      var gOPD = __webpack_require__("11e9");
+      var createProperty = __webpack_require__("f1ae");
+
+      $export($export.S, "Object", {
+        getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
+          var O = toIObject(object);
+          var getDesc = gOPD.f;
+          var keys = ownKeys(O);
+          var result = {};
+          var i = 0;
+          var key, desc;
+          while (keys.length > i) {
+            desc = getDesc(O, (key = keys[i++]));
+            if (desc !== undefined) createProperty(result, key, desc);
+          }
+          return result;
+        },
+      });
+
+      /***/
+    },
+
+    /***/ "983e": /***/ function(
       module,
       __webpack_exports__,
       __webpack_require__
     ) {
       "use strict";
-      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_64bf90dd_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
-        "7914"
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_city_vue_vue_type_style_index_0_id_6e44cfa9_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "6dea"
       );
-      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_64bf90dd_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
-        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_64bf90dd_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_city_vue_vue_type_style_index_0_id_6e44cfa9_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_city_vue_vue_type_style_index_0_id_6e44cfa9_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__
       );
       /* unused harmony reexport * */
-      /* unused harmony default export */ var _unused_webpack_default_export =
-        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_64bf90dd_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0___default.a;
+
+      /***/
+    },
+
+    /***/ "990b": /***/ function(module, exports, __webpack_require__) {
+      // all object keys, includes non-enumerable and symbols
+      var gOPN = __webpack_require__("9093");
+      var gOPS = __webpack_require__("2621");
+      var anObject = __webpack_require__("cb7c");
+      var Reflect = __webpack_require__("7726").Reflect;
+      module.exports =
+        (Reflect && Reflect.ownKeys) ||
+        function ownKeys(it) {
+          var keys = gOPN.f(anObject(it));
+          var getSymbols = gOPS.f;
+          return getSymbols ? keys.concat(getSymbols(it)) : keys;
+        };
+
+      /***/
+    },
+
+    /***/ "9dba": /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      // ESM COMPAT FLAG
+      __webpack_require__.r(__webpack_exports__);
+
+      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"3a672da0-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/activity/views/newuser/activity_01.vue?vue&type=template&id=27f76de3&scoped=true&
+      var render = function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c(
+          "div",
+          {
+            staticClass: "newuser",
+            class: {
+              loading: _vm.page === 1 && _vm.isLoading,
+              isshow: _vm.filterGroupShow,
+            },
+          },
+          [
+            _c(
+              "ul",
+              {
+                staticClass: "selector",
+                on: {
+                  click: function($event) {
+                    _vm.filterGroupShow = true;
+                  },
+                },
+              },
+              [
+                _c(
+                  "li",
+                  {
+                    on: {
+                      click: function($event) {
+                        _vm.selectedSort = "city";
+                      },
+                    },
+                  },
+                  [_vm._v(_vm._s(_vm.cityInfo.name))]
+                ),
+                _c(
+                  "li",
+                  {
+                    on: {
+                      click: function($event) {
+                        _vm.selectedSort = "sort";
+                      },
+                    },
+                  },
+                  [_vm._v(_vm._s(_vm.sortInfo.name))]
+                ),
+              ]
+            ),
+            _vm.filterGroupShow
+              ? _c("filter-group", {
+                  attrs: {
+                    selectedSort: _vm.selectedSort,
+                    cityInfo: _vm.cityInfo,
+                    sortInfo: _vm.sortInfo,
+                    selectionSource: _vm.selectionSource,
+                  },
+                  on: {
+                    close: function($event) {
+                      _vm.filterGroupShow = false;
+                    },
+                    "select-city": function($event) {
+                      _vm.selectedSort = "city";
+                    },
+                    "select-sort": function($event) {
+                      _vm.selectedSort = "sort";
+                    },
+                    renderNewChange: _vm.renderFilterNewChange,
+                  },
+                })
+              : _vm._e(),
+            _c("div", { staticClass: "newuser__hotcake" }, [
+              _c(
+                "ul",
+                { staticClass: "hotcake__product" },
+                [
+                  _vm._l(_vm.hotProduct, function(item, index) {
+                    return [
+                      item.pid
+                        ? _c(
+                            "li",
+                            {
+                              key: item.pid + "-" + index,
+                              ref: "hotcake_product_item",
+                              refInFor: true,
+                              attrs: { pid: item.pid, index: index + 1 },
+                              on: {
+                                click: function($event) {
+                                  return _vm.actToProductPage(item);
+                                },
+                              },
+                            },
+                            [
+                              item.img_cover
+                                ? _c("img", {
+                                    directives: [
+                                      {
+                                        name: "lazy",
+                                        rawName: "v-lazy",
+                                        value: item.img_cover,
+                                        expression: "item.img_cover",
+                                      },
+                                    ],
+                                    staticClass: "hotcake__product--img",
+                                    attrs: { alt: "" },
+                                  })
+                                : _c("div", {
+                                    staticClass: "hotcake__product--img",
+                                  }),
+                              _c(
+                                "div",
+                                { staticClass: "hotcake__product--con" },
+                                [
+                                  _c(
+                                    "p",
+                                    { staticClass: "hotcake__product--title" },
+                                    [_vm._v(_vm._s(item.title))]
+                                  ),
+                                  _c(
+                                    "p",
+                                    { staticClass: "hotcake__product--label" },
+                                    [_vm._v("安心购")]
+                                  ),
+                                  _c(
+                                    "p",
+                                    { staticClass: "hotcake__product--num" },
+                                    [
+                                      _c(
+                                        "span",
+                                        {
+                                          staticClass:
+                                            "hotcake__product--online",
+                                        },
+                                        [
+                                          _c(
+                                            "i",
+                                            {
+                                              staticClass:
+                                                "hotcake__online--unit",
+                                            },
+                                            [_vm._v("¥")]
+                                          ),
+                                          _vm._v(_vm._s(item.price_online)),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                  _c(
+                                    "p",
+                                    { staticClass: "hotcake__product--footer" },
+                                    [
+                                      _c(
+                                        "span",
+                                        {
+                                          staticClass: "hotcake__footer--name",
+                                        },
+                                        [_vm._v(_vm._s(item.hospital_name))]
+                                      ),
+                                      item.show_order_cnt > 0
+                                        ? _c(
+                                            "span",
+                                            {
+                                              staticClass:
+                                                "hotcake__footer--sell",
+                                            },
+                                            [
+                                              _vm._v(
+                                                "已售" +
+                                                  _vm._s(item.show_order_cnt) +
+                                                  "件"
+                                              ),
+                                            ]
+                                          )
+                                        : _c(
+                                            "span",
+                                            {
+                                              staticClass:
+                                                "hotcake__footer--sell",
+                                            },
+                                            [_vm._v("新品上架")]
+                                          ),
+                                    ]
+                                  ),
+                                ]
+                              ),
+                            ]
+                          )
+                        : _vm._e(),
+                    ];
+                  }),
+                ],
+                2
+              ),
+            ]),
+            _c(
+              "div",
+              {
+                ref: "loadingMore",
+                staticClass: "newuser__loading",
+                class: { isios: _vm.$utils.isIos() },
+              },
+              [
+                !_vm.has_more ? _c("span", [_vm._v("没有更多了哦")]) : _vm._e(),
+                _vm.isLoading
+                  ? _c("span", [_c("i"), _vm._v("加载中...")])
+                  : _vm._e(),
+              ]
+            ),
+          ],
+          1
+        );
+      };
+      var staticRenderFns = [];
+
+      // CONCATENATED MODULE: ./src/pages/activity/views/newuser/activity_01.vue?vue&type=template&id=27f76de3&scoped=true&
+
+      // EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs2/helpers/esm/toConsumableArray.js + 3 modules
+      var toConsumableArray = __webpack_require__("75fc");
+
+      // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.array.sort.js
+      var es6_array_sort = __webpack_require__("55dd");
+
+      // EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
+      var runtime = __webpack_require__("96cf");
+
+      // EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs2/helpers/esm/asyncToGenerator.js
+      var asyncToGenerator = __webpack_require__("3b8d");
+
+      // EXTERNAL MODULE: ./src/api/repeatPurchasing.js
+      var repeatPurchasing = __webpack_require__("0b92");
+
+      // EXTERNAL MODULE: ./src/api/newuser.js
+      var newuser = __webpack_require__("f604");
+
+      // EXTERNAL MODULE: ./src/components/filter-group/index.vue + 4 modules
+      var filter_group = __webpack_require__("07e8");
+
+      // EXTERNAL MODULE: ./src/pages/activity/views/newuser/mock.json
+      var mock = __webpack_require__("5a61");
+
+      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/pages/activity/views/newuser/activity_01.vue?vue&type=script&lang=js&
+
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+
+      /* harmony default export */ var activity_01vue_type_script_lang_js_ = {
+        name: "newuser",
+        data: function data() {
+          return {
+            hotProduct: [],
+            hot_item: [],
+            page: 1,
+            cityId: 0,
+            sort: 0,
+            has_more: true,
+            hasdone: false,
+            isLoading: true,
+            cityInfo: {
+              name: "全部城市",
+              id: 0,
+            },
+            sortInfo: {
+              name: "智能排序",
+              sort: 0,
+            },
+            selectedSort: "city",
+            selectionSource: {},
+            filterGroupShow: false,
+          };
+        },
+        created: function created() {
+          // 获取数据
+          this.cityId = window.globalInfo.cityId || 0;
+          this.hotProduct = mock.hotProduct;
+          this.getSelectionData();
+          this.getHotData();
+        },
+        mounted: function mounted() {
+          var _this = this;
+
+          this.$nextTick(function() {
+            _this.onScroll();
+          });
+        },
+        methods: {
+          // 获取商品
+          getHotData: (function() {
+            var _getHotData = Object(asyncToGenerator["a" /* default */])(
+              /*#__PURE__*/ regeneratorRuntime.mark(function _callee() {
+                var res, _res$data, list, has_more, _this$hotProduct;
+
+                return regeneratorRuntime.wrap(
+                  function _callee$(_context) {
+                    while (1) {
+                      switch ((_context.prev = _context.next)) {
+                        case 0:
+                          _context.prev = 0;
+                          this.isLoading = true;
+                          _context.next = 4;
+                          return Object(
+                            newuser["a" /* getCommonProductList */]
+                          )({
+                            page: this.page || 1,
+                            cityId: this.cityId || 0,
+                            sort: this.sort || 0,
+                            price_online_min: 100,
+                          });
+
+                        case 4:
+                          res = _context.sent;
+                          this.isLoading = false;
+
+                          if (res.status === 200) {
+                            (_res$data = res.data),
+                              (list = _res$data.list),
+                              (has_more = _res$data.has_more);
+
+                            if (this.page === 1) {
+                              this.hotProduct = list;
+                            } else {
+                              (_this$hotProduct = this.hotProduct).push.apply(
+                                _this$hotProduct,
+                                Object(toConsumableArray["a" /* default */])(
+                                  list
+                                )
+                              );
+                            }
+
+                            this.cityInfo = {
+                              name: res.data.city_name || "全部城市",
+                              id: this.cityId || 0,
+                            };
+                            this.has_more = has_more;
+                          }
+
+                          _context.next = 13;
+                          break;
+
+                        case 9:
+                          _context.prev = 9;
+                          _context.t0 = _context["catch"](0);
+                          this.has_more = false;
+                          this.$toast(_context.t0 || "获取商品接口报错");
+
+                        case 13:
+                        case "end":
+                          return _context.stop();
+                      }
+                    }
+                  },
+                  _callee,
+                  this,
+                  [[0, 9]]
+                );
+              })
+            );
+
+            function getHotData() {
+              return _getHotData.apply(this, arguments);
+            }
+
+            return getHotData;
+          })(),
+          //跳转商品详情页
+          actToProductPage: function actToProductPage(item) {
+            if (!item.pid) return;
+            var ext = JSON.stringify(item.ext);
+
+            if (this.$utils.isApp()) {
+              if (this.$utils.isIos()) {
+                window.location.href = "app.soyoung://yuehui/productdetail?pid="
+                  .concat(
+                    item.pid,
+                    "&from_action=sy_m_home_new_sell:sku_click&ext="
+                  )
+                  .concat(ext);
+              } else {
+                window.location.href = "app.soyoung://product?pid="
+                  .concat(
+                    item.pid,
+                    "&from_action=sy_m_home_new_sell:sku_click&ext="
+                  )
+                  .concat(ext);
+              }
+            } else {
+              window.location.href = "https://"
+                .concat(window.location.host, "/normal/cpwap")
+                .concat(
+                  item.pid,
+                  "/?from_action=sy_m_home_new_sell:sku_click&ext="
+                )
+                .concat(ext);
+            }
+          },
+          onScroll: function onScroll() {
+            var _this2 = this;
+
+            var dom = this.$refs.loadingMore;
+            var observer = new IntersectionObserver(
+              function(entries) {
+                if (
+                  entries[0].intersectionRatio > 0 &&
+                  _this2.has_more &&
+                  !_this2.isLoading
+                ) {
+                  _this2.page++;
+
+                  _this2.getHotData();
+                }
+              },
+              {
+                root: null,
+                threshold: 0.1,
+              }
+            );
+            observer.observe(dom);
+          },
+          // 选择筛选项
+          renderFilterNewChange: function renderFilterNewChange(type, data) {
+            this[type + "Info"] = data; // 异步更新数据
+
+            if (type === "city") this.cityId = data.id;
+            if (type === "sort") this.sort = data.sort;
+            this.hotProduct = [];
+            this.filterGroupShow = false;
+            this.page = 1;
+            this.getHotData();
+          },
+          // 获取筛选列表数据
+          getSelectionData: (function() {
+            var _getSelectionData = Object(asyncToGenerator["a" /* default */])(
+              /*#__PURE__*/ regeneratorRuntime.mark(function _callee2() {
+                var _yield$getFilterData, errorCode, errorMsg, responseData;
+
+                return regeneratorRuntime.wrap(
+                  function _callee2$(_context2) {
+                    while (1) {
+                      switch ((_context2.prev = _context2.next)) {
+                        case 0:
+                          _context2.next = 2;
+                          return Object(
+                            repeatPurchasing["c" /* getFilterData */]
+                          )();
+
+                        case 2:
+                          _yield$getFilterData = _context2.sent;
+                          errorCode = _yield$getFilterData.errorCode;
+                          errorMsg = _yield$getFilterData.errorMsg;
+                          responseData = _yield$getFilterData.responseData;
+
+                          if (errorCode === 0) {
+                            this.selectionSource = responseData || {};
+                          } else {
+                            this.$toast(errorMsg || "接口错误，请重试");
+                          }
+
+                        case 7:
+                        case "end":
+                          return _context2.stop();
+                      }
+                    }
+                  },
+                  _callee2,
+                  this
+                );
+              })
+            );
+
+            function getSelectionData() {
+              return _getSelectionData.apply(this, arguments);
+            }
+
+            return getSelectionData;
+          })(),
+        },
+        components: {
+          filterGroup: filter_group["a" /* default */],
+        },
+      };
+      // CONCATENATED MODULE: ./src/pages/activity/views/newuser/activity_01.vue?vue&type=script&lang=js&
+      /* harmony default export */ var newuser_activity_01vue_type_script_lang_js_ = activity_01vue_type_script_lang_js_;
+      // EXTERNAL MODULE: ./src/pages/activity/views/newuser/activity_01.vue?vue&type=style&index=0&lang=less&
+      var activity_01vue_type_style_index_0_lang_less_ = __webpack_require__(
+        "e192"
+      );
+
+      // EXTERNAL MODULE: ./src/pages/activity/views/newuser/activity_01.vue?vue&type=style&index=1&id=27f76de3&lang=less&scoped=true&
+      var activity_01vue_type_style_index_1_id_27f76de3_lang_less_scoped_true_ = __webpack_require__(
+        "0843"
+      );
+
+      // EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
+      var componentNormalizer = __webpack_require__("2877");
+
+      // CONCATENATED MODULE: ./src/pages/activity/views/newuser/activity_01.vue
+
+      /* normalize component */
+
+      var component = Object(componentNormalizer["a" /* default */])(
+        newuser_activity_01vue_type_script_lang_js_,
+        render,
+        staticRenderFns,
+        false,
+        null,
+        "27f76de3",
+        null
+      );
+
+      /* harmony default export */ var activity_01 = (__webpack_exports__[
+        "default"
+      ] = component.exports);
+
+      /***/
+    },
+
+    /***/ bd86: /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      /* harmony export (binding) */ __webpack_require__.d(
+        __webpack_exports__,
+        "a",
+        function() {
+          return _defineProperty;
+        }
+      );
+      /* harmony import */ var _babel_runtime_corejs2_core_js_object_define_property__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "85f2"
+      );
+      /* harmony import */ var _babel_runtime_corejs2_core_js_object_define_property__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+        _babel_runtime_corejs2_core_js_object_define_property__WEBPACK_IMPORTED_MODULE_0__
+      );
+
+      function _defineProperty(obj, key, value) {
+        if (key in obj) {
+          _babel_runtime_corejs2_core_js_object_define_property__WEBPACK_IMPORTED_MODULE_0___default()(
+            obj,
+            key,
+            {
+              value: value,
+              enumerable: true,
+              configurable: true,
+              writable: true,
+            }
+          );
+        } else {
+          obj[key] = value;
+        }
+
+        return obj;
+      }
+
+      /***/
+    },
+
+    /***/ d12a: /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+
+      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"3a672da0-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/filter-group/city.vue?vue&type=template&id=6e44cfa9&scoped=true&
+      var render = function() {
+        var _vm = this;
+        var _h = _vm.$createElement;
+        var _c = _vm._self._c || _h;
+        return _c("div", { staticClass: "filter-city" }, [
+          _c(
+            "div",
+            { staticClass: "city__nav" },
+            _vm._l(_vm.list, function(nav, index) {
+              return _c(
+                "span",
+                {
+                  key: nav.name,
+                  staticClass: "city__nav--item",
+                  class: { "is-active": +index === +_vm.provinceIndex },
+                  on: {
+                    click: function($event) {
+                      return _vm.getChildCity(nav, index);
+                    },
+                  },
+                },
+                [_vm._v("\n      " + _vm._s(nav.name) + "\n    ")]
+              );
+            }),
+            0
+          ),
+          _c(
+            "div",
+            { staticClass: "city__btn" },
+            [
+              _vm.cityList.length > 1
+                ? _vm._l(_vm.cityList, function(item, index) {
+                    return _c(
+                      "span",
+                      {
+                        key: item.value_cnt,
+                        staticClass: "city__btn--item",
+                        class: { "is-active": +item.id === +_vm.cityInfo.id },
+                        on: {
+                          click: function($event) {
+                            return _vm.getCityIndex(index);
+                          },
+                        },
+                      },
+                      [_vm._v("\n        " + _vm._s(item.name) + "\n      ")]
+                    );
+                  })
+                : _vm._e(),
+            ],
+            2
+          ),
+        ]);
+      };
+      var staticRenderFns = [];
+
+      // CONCATENATED MODULE: ./src/components/filter-group/city.vue?vue&type=template&id=6e44cfa9&scoped=true&
+
+      // EXTERNAL MODULE: ./node_modules/core-js/modules/es7.object.get-own-property-descriptors.js
+      var es7_object_get_own_property_descriptors = __webpack_require__("8e6e");
+
+      // EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom.iterable.js
+      var web_dom_iterable = __webpack_require__("ac6a");
+
+      // EXTERNAL MODULE: ./node_modules/core-js/modules/es6.object.keys.js
+      var es6_object_keys = __webpack_require__("456d");
+
+      // EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs2/helpers/esm/defineProperty.js
+      var defineProperty = __webpack_require__("bd86");
+
+      // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--12-0!./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib!./node_modules/cache-loader/dist/cjs.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./src/components/filter-group/city.vue?vue&type=script&lang=js&
+
+      function ownKeys(object, enumerableOnly) {
+        var keys = Object.keys(object);
+        if (Object.getOwnPropertySymbols) {
+          var symbols = Object.getOwnPropertySymbols(object);
+          if (enumerableOnly) {
+            symbols = symbols.filter(function(sym) {
+              return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+            });
+          }
+          keys.push.apply(keys, symbols);
+        }
+        return keys;
+      }
+
+      function _objectSpread(target) {
+        for (var i = 1; i < arguments.length; i++) {
+          var source = arguments[i] != null ? arguments[i] : {};
+          if (i % 2) {
+            ownKeys(Object(source), true).forEach(function(key) {
+              Object(defineProperty["a" /* default */])(
+                target,
+                key,
+                source[key]
+              );
+            });
+          } else if (Object.getOwnPropertyDescriptors) {
+            Object.defineProperties(
+              target,
+              Object.getOwnPropertyDescriptors(source)
+            );
+          } else {
+            ownKeys(Object(source)).forEach(function(key) {
+              Object.defineProperty(
+                target,
+                key,
+                Object.getOwnPropertyDescriptor(source, key)
+              );
+            });
+          }
+        }
+        return target;
+      }
+      /* harmony default export */ var cityvue_type_script_lang_js_ = {
+        name: "city-list",
+        data: function data() {
+          return {
+            provinceIndex: 0,
+            //当前省份索引
+            cityIndex: 0,
+            //当前城市索引
+            cityList: [],
+            //
+            province_id: 0, //当前省份id
+          };
+        },
+        props: {
+          list: {},
+          cityInfo: {},
+        },
+        mounted: function mounted() {
+          this.provinceIndex = +this.cityInfo.provinceIndex || 0;
+          this.renderCityList();
+        },
+        // watch:{  },
+        methods: {
+          renderCityList: function renderCityList() {
+            if (!this.list) return;
+
+            if (!this.cityInfo.provinceIndex) {
+              this.cityList = this.list[0].son || [];
+              return;
+            }
+
+            console.log("+this.cityInfo.upid", this.cityInfo);
+            var provinceData = this.list[this.cityInfo.provinceIndex];
+            if (!provinceData || provinceData.length === 0)
+              provinceData = this.list;
+            console.log("provinceData", provinceData);
+            this.cityList = provinceData.son || [];
+          },
+          // 获取城市列表
+          getChildCity: function getChildCity(item, index) {
+            //左边为热门城市，省份Id传0
+            this.province_id = index == 0 ? 0 : item.id;
+            this.provinceIndex = index;
+            this.cityList = item.son || [];
+
+            if (this.cityList.length === 1) {
+              this.$emit(
+                "getSelected",
+                _objectSpread(
+                  _objectSpread({}, this.cityList[0]),
+                  {},
+                  {
+                    provinceIndex: this.provinceIndex,
+                    province_id: this.province_id,
+                  }
+                )
+              );
+            }
+          },
+          // 获取当前城市
+          getCityIndex: function getCityIndex(index) {
+            this.cityIndex = index;
+            this.$emit(
+              "getSelected",
+              _objectSpread(
+                _objectSpread({}, this.cityList[index]),
+                {},
+                {
+                  provinceIndex: this.provinceIndex,
+                  province_id: this.province_id,
+                }
+              )
+            );
+          },
+        },
+      };
+      // CONCATENATED MODULE: ./src/components/filter-group/city.vue?vue&type=script&lang=js&
+      /* harmony default export */ var filter_group_cityvue_type_script_lang_js_ = cityvue_type_script_lang_js_;
+      // EXTERNAL MODULE: ./src/components/filter-group/city.vue?vue&type=style&index=0&id=6e44cfa9&lang=less&scoped=true&
+      var cityvue_type_style_index_0_id_6e44cfa9_lang_less_scoped_true_ = __webpack_require__(
+        "983e"
+      );
+
+      // EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
+      var componentNormalizer = __webpack_require__("2877");
+
+      // CONCATENATED MODULE: ./src/components/filter-group/city.vue
+
+      /* normalize component */
+
+      var component = Object(componentNormalizer["a" /* default */])(
+        filter_group_cityvue_type_script_lang_js_,
+        render,
+        staticRenderFns,
+        false,
+        null,
+        "6e44cfa9",
+        null
+      );
+
+      /* harmony default export */ var city = (__webpack_exports__["a"] =
+        component.exports);
+
+      /***/
+    },
+
+    /***/ d4ab: /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_1befa301_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "5d54"
+      );
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_1befa301_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_1befa301_lang_less_scoped_true___WEBPACK_IMPORTED_MODULE_0__
+      );
+      /* unused harmony reexport * */
+
+      /***/
+    },
+
+    /***/ e192: /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_0_lang_less___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "3ddb"
+      );
+      /* harmony import */ var _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_0_lang_less___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+        _node_modules_mini_css_extract_plugin_dist_loader_js_ref_10_oneOf_1_0_node_modules_css_loader_index_js_ref_10_oneOf_1_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_10_oneOf_1_2_node_modules_less_loader_dist_cjs_js_ref_10_oneOf_1_3_node_modules_cache_loader_dist_cjs_js_ref_0_0_node_modules_vue_loader_lib_index_js_vue_loader_options_activity_01_vue_vue_type_style_index_0_lang_less___WEBPACK_IMPORTED_MODULE_0__
+      );
+      /* unused harmony reexport * */
+
+      /***/
+    },
+
+    /***/ f1ae: /***/ function(module, exports, __webpack_require__) {
+      "use strict";
+
+      var $defineProperty = __webpack_require__("86cc");
+      var createDesc = __webpack_require__("4630");
+
+      module.exports = function(object, index, value) {
+        if (index in object)
+          $defineProperty.f(object, index, createDesc(0, value));
+        else object[index] = value;
+      };
+
+      /***/
+    },
+
+    /***/ f604: /***/ function(
+      module,
+      __webpack_exports__,
+      __webpack_require__
+    ) {
+      "use strict";
+      /* harmony export (binding) */ __webpack_require__.d(
+        __webpack_exports__,
+        "c",
+        function() {
+          return getNewuserProduct;
+        }
+      );
+      /* harmony export (binding) */ __webpack_require__.d(
+        __webpack_exports__,
+        "b",
+        function() {
+          return getHot;
+        }
+      );
+      /* harmony export (binding) */ __webpack_require__.d(
+        __webpack_exports__,
+        "d",
+        function() {
+          return recordId;
+        }
+      );
+      /* harmony export (binding) */ __webpack_require__.d(
+        __webpack_exports__,
+        "a",
+        function() {
+          return getCommonProductList;
+        }
+      );
+      /* harmony import */ var _http__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+        "c1fb"
+      );
+      // 获取新人超低价商品
+
+      var getNewuserProduct = function getNewuserProduct(params) {
+        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
+          data: params,
+          url: "/NewerRecommend/Index",
+          method: "post",
+        });
+      }; // 获取爆款补贴区
+
+      var getHot = function getHot(params) {
+        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
+          data: params,
+          url: "/NewerRecommend/Hot",
+          method: "post",
+        });
+      }; // 记录点击的类目
+
+      var recordId = function recordId(params) {
+        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
+          data: params,
+          url: "/NewerRecommend/RecordView",
+          method: "post",
+        });
+      };
+      var getCommonProductList = function getCommonProductList(params) {
+        return Object(_http__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"])({
+          data: params,
+          url: "/indexUser/commonProductList",
+          method: "post",
+        });
+      };
 
       /***/
     },

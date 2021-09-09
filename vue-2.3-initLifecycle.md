@@ -117,6 +117,7 @@ Vue.prototype.$destroy = function() {
     vm.$el.__vue__ = null;
   }
   // release circular reference (#6759)
+  //https://github.com/vuejs/vue/issues/6759 ；内存泄漏
   if (vm.$vnode) {
     vm.$vnode.parent = null;
   }

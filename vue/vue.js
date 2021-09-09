@@ -3269,7 +3269,6 @@
     }
 
     var baseCtor = context.$options._base;
-
     // plain options object: turn it into a constructor
     if (isObject(Ctor)) {
       Ctor = baseCtor.extend(Ctor);
@@ -5294,6 +5293,7 @@
      * Class inheritance
      */
     Vue.extend = function(extendOptions) {
+      console.log("this", this);
       extendOptions = extendOptions || {};
       var Super = this;
       var SuperId = Super.cid;

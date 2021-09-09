@@ -16,16 +16,23 @@
             a: 111,
           };
         },
-        template: `<div><span v-once><slot name="a"></slot><a v-once><slot name="b"></slot></a></span></div>`,
+        template: `<div @click="click">click</div>`,
         mounted() {
           console.log(this);
         },
+        methods: {
+          click() {
+            this.$emit("mmm");
+          },
+        },
       });
+      const grandson = child.extend({});
       const app = new Vue({
         components: {
           child,
+          grandson,
         },
-        template: `<div><child><template v-slot:a>dd</template><template v-slot:b>11</template></child></div>`,
+        template: `<div><grandson></grandson><child @mmm="function(){}"></child></div>`,
       }).$mount("#app");
     </script>
   </body>
