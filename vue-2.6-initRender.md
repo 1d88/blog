@@ -1,6 +1,6 @@
 # 实例的渲染
 
-初始化渲染，在初始化完事件之后开始触发。初始化渲染之后，就会调用`beforeCreated`的方法
+实例的初始化渲染之后，就会调用`beforeCreate`的方法
 
 ## 1、renderMixin
 
@@ -54,7 +54,7 @@ Vue.prototype._render = function() {
 
 `_render`函数通过当前实例的选项`$options`获取`render`，`render`返回当前实例的`vnode`树。然后获取`_parentVnode`，`_parentVnode`是父组件中的预置`vnode`节点，如果这个节点存在，归一化当前的插槽，并且赋值到当前实例的`$scopedSlots`上，`normalizeScopedSlots`细节会在插槽详细介绍。
 
-实例的`$vnode`是当前实例的根`vnode`节点，这里设置了父级的预置节点，这个就可以访问预置节点上面的数据。第二部分：
+实例的`$vnode`表示当前实例根`vnode`节点，这里设置了父级的预置节点，这样就可以访问父类预置节点上面的数据。第二部分：
 
 ```js
 // ...
@@ -91,14 +91,14 @@ try {
 // ...
 ```
 
-这部分是生成`vnode`的代码，指定当前实例为`currentRenderingInstance`；这里作者也备注了*并没有必要使用一个栈，因为渲染函数一个一个地独立被调用，嵌套组件的渲染函数都是父组件的打完补丁才轮到子组件*。所以只要一个 flag 来标识当然的渲染中实例就可以。
+这部分是生成`vnode`的代码，指定当前实例为`currentRenderingInstance`；这里作者也备注了*并没有必要使用一个栈，因为渲染函数一个一个地独立被调用，嵌套组件的渲染函数都是父组件的打完补丁才轮到子组件*。所以只要一个 flag 来标识当然的渲染中实例就可以。这个字段可以追溯到`resolveAsyncComponent`函数中，主要跟异步组件的创建有关系。之后在异步组件会讨论。
 
-`vnode = render.call(vm._renderProxy, vm.$createElement)`在`实例的属性代理`讲过，属性的代理为了有更好警告提示。不论通过手写`render`或者编译的`template`，都存在很大的几率报错，所以使用了`try...catch...`来捕获`render`的执行。如果走入了 catch 代码块，开发者定义过`renderError`，那么执行 `renderError` 的错误处理；
-只要走入错误，`vnode`就会被设置为父组件预置的节点`vnode = vm._vnode`。
+`vnode = render.call(vm._renderProxy, vm.$createElement)`在`实例的属性代理`讲过，属性的代理可以有更好警告提示。不论通过手写`render`或者编译的`template`，都存在很大的几率报错，所以使用了`try...catch...`来捕获`render`的执行。如果走入了 catch 代码块，开发者定义过`renderError`，那么执行 `renderError` 的错误处理；
+
+`vm._vnode`的赋值操作来自于`initRender`中`vm._vnode = null`，如果执行 render 报错，那么`vnode`会被赋值为`null`。第三部分：
 
 ```js
 // if the returned array contains only a single node, allow it
-// 这个问题 ：https://github.com/vuejs/vue/issues/8056
 if (Array.isArray(vnode) && vnode.length === 1) {
   vnode = vnode[0];
 }
@@ -117,6 +117,34 @@ if (!(vnode instanceof VNode)) {
 vnode.parent = _parentVnode;
 return vnode;
 ```
+
+如果返回的是一个数组并且里面只有一个元素，那么`vnode`就是数组中的第一个元素，这个特性是为了在不破坏现有代码的结构来使`render`函数 return`this.$scopedSlots.default({})`仍然可以工作，针对于 vue 之前版本的一个兼容（https://github.com/vuejs/vue/issues/8056）。
+
+如果返回的是一个数组，但存在多个元素。会报错：
+<img src="./images/Multiple_root_nodes_error.jpg"  width="500">
+`console`信息：
+<img src="./images/multiple_root_error.jpg"  width="500">
+
+当是函数组件时（`Functional components`），可能会返回包含多个子节点的数组。函数组件（`Functional components`）返回一个数组而不是单个根节点的例子：
+
+```js
+const child = Vue.extend({
+  functional: true,
+  render(h) {
+    return [1, 2];
+  },
+});
+const app = new Vue({
+  components: {
+    child,
+  },
+  template: `<child></child>`,
+}).\$mount("#app");
+```
+
+注：函数组件不存在`vm`，并不会走入`_render`。而是使用`createFunctionalComponent`生成函数组件，内部不会校验多根问题。
+
+最后`vnode.parent`指向`_parentVnode`也就是当前父组件的节点，并返回`vnode`。
 
 ## 2、initRender
 
@@ -354,3 +382,9 @@ var staticRenderFns = [
 
 `$attr`字段是当前`vm`除了`class`和`style`之外的标签属性对象。在`updateChildComponent`函数中维护
 `vm.$attrs = parentVnode.data.attrs || emptyObject;`；当`inheritAttrs`为 false 时，我们可以通过`v-bind:$attrs`将父类预置节点上的属性“转嫁”到子类的根节点上，给与响应式的意义在于，如果父类预置节点上的属性有变化，那么子类也会触发响应式。`$listeners`同理。
+
+## 3、总结
+
+`renderMixin`维护了`_render`和`$nextTick`的两个方法，实例的内部方法`_render`是非函数组件调用生成`vnode`的函数，触发时机在调用`vm._update`时，第一参数传入的`vnode`，就是依赖`_render`生成的：`vm._update(vm._render(), hydrating)`，可以说这个函数是构建虚拟 dom 最顶层的方法。
+
+当`vm`调用`initRender`后，和渲染相关的参数基本初始化完毕：`_vnode`的定义，是否静态树，预置节点，渲染上下文，插槽相关以及`$attr`和`$listener`的响应式处理。

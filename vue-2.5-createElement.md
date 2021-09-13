@@ -24,24 +24,7 @@ Vue.prototype._render = function() {
 };
 ```
 
-由此可见，无论我们通过哪种方式生成`render`函数，最终都会调用`$createElement`去生成一个 Vnode。（当是函数组件时（`Functional components`），可能会返回包含多个子节点的数组，当是调用作用域插槽时，会返回包含一个函数的数组）。
-
-函数组件（`Functional components`）返回一个数组而不是单个根节点的例子：
-
-```js
-const child = Vue.extend({
-  functional: true,
-  render(h) {
-    return [1, 2];
-  },
-});
-const app = new Vue({
-  components: {
-    child,
-  },
-  template: `<child></child>`,
-}).\$mount("#app");
-```
+由此可见，无论我们通过哪种方式生成`render`函数，最终都会调用`$createElement`去生成一个 Vnode。
 
 ## 2、vm.\$createElement
 
