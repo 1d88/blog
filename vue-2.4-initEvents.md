@@ -1,4 +1,4 @@
-# initEvents
+# 实例的事件机制
 
 > eventsMixin 定义了原型上自定义事件的方法；initEvents 定义了具体实例上的事件集合
 
@@ -20,7 +20,7 @@ function eventsMixin(Vue) {
 }
 ```
 
-eventsMixin 主要定义了原型上的`$on`，`$once`，`$off`，`$emit`这四个方法：`$on`负责向事件集合添加事件，`$once`表示添加只执行一次的事件，具体实现在执行回调中调用了`$off`来卸载这个事件。`$emit`是执行事件集合中对应的事件。这是一个发布订阅的模式，用来实现子级向父级的数据交互。父级通过订阅这个事件，接受来自子级事件的发布信息，从而执行对应的事件句柄。组件内部也可以订阅相应的事件，或者 hook 事件，从而实现逻辑上解耦。
+eventsMixin 主要定义了原型上`$on`，`$once`，`$off`，`$emit`这四个方法：`$on`向事件集合添加事件，`$once`添加只执行一次的事件，具体实现在执行回调中调用了`$off`来卸载这个事件。`$emit`触发事件。这是一个发布订阅的模式，用来实现子级向父级的数据交互。父级通过订阅这个事件，接受来自子级事件的发布信息，从而执行对应的事件句柄。组件内部也可以订阅相应的事件，或者 hook 事件，从而实现逻辑上解耦。
 
 ### 1.1、Vue.protorype.\$on
 
@@ -46,7 +46,7 @@ Vue.prototype.$on = function(event, fn) {
 };
 ```
 
-最终会维护一个`vm._events = {event: [invoker, invoker],};`这样的结构。当传入的`event`为一个数组时，会展开数组，给每个数组元素绑定相同的 fn。如果`vm`存在 hook 事件，那么`vm._hasHookEvent`设置为`true`，在`callHook`函数中，会`$emit`所有的`hook`事件，通过`$on('hook:xxxx')`才会触发，没有订阅就不会触发。
+这个方法最终会维护一个`vm._events = {event: [invoker, invoker],};`这样的结构。当传入的`event`为一个数组时，会展开数组，给数组中每个事件名注册 fn。如果`vm`存在 hook 事件，那么`vm._hasHookEvent`设置为`true`，在`callHook`函数中，会`$emit`所有的`hook`事件，只有通过`$on('hook:xxxx')`才会触发，没有订阅就不会触发。
 
 ```js
 function callHook(vm, hook) {
@@ -171,7 +171,7 @@ Vue.prototype.$emit = function(event) {
 };
 ```
 
-`Vue.prototype.$emit`触发当前实例上的事件。附加参数都会传给监听器回调。会忽略掉没有订阅的无效发布。比如：`callHook`函数中的`$emit('hook:'+hook)`，调用`callHook`时都会触发`$emit('hook:'+hook)`，但是只有`\$on('hook:xx')`订阅过的才会触发。此外事件回调的执行是有错误处理的，这是`invokeWithErrorHandling`提供的能力，具体是使用`try{}catch(e){}`捕获同步的异常，如果事件句柄执行返回了一个`Promise`，使用`Promise.prototype.catch`来捕获错误。
+`Vue.prototype.$emit`触发当前实例上的事件。附加参数都会传给监听器回调。会忽略掉没有订阅的无效发布。比如：`callHook`函数中的`$emit('hook:'+hook)`，调用`callHook`时都会触发`$emit('hook:'+hook)`，但是只有`\$on('hook:xx')`订阅过的才会触发。此外事件回调的执行是有错误处理的，这是`invokeWithErrorHandling`提供的能力，使用`try{...}catch(e){...}`捕获同步的异常，如果事件句柄执行返回了一个`Promise`，使用`Promise.prototype.catch`来捕获错误。
 
 ## 2、initEvents
 
@@ -202,7 +202,7 @@ function initEvents(vm) {
 }
 ```
 
-我们都知道子类向父类传递信息的方式是通过事件，父类中的预置节点的事件对象`listeners`会传递到子类根节点并且绑定，这样在父类中订阅，在子类中触发，实质上都维护在子类实例的`_events`中。触发时，调用的是父类中的回调方法。
+我们都知道子组件向父组件传递信息的方式是通过`$emit`一个事件，父组件中的预置节点的事件对象`listeners`会传递到子组件的根节点并且绑定，这样在父组件中订阅，在子组件中触发，实质上都维护在子组件实例的`_events`中。触发时，调用父组件中的回调方法。
 
 ### 2.1、updateListeners 函数
 
@@ -373,4 +373,4 @@ function cached(fn) {
 `invokeWithErrorHandling`包含了 `try ... catch ...`代码块，来捕捉**同步**fn 执行抛出的异常，同时如果 fn 返回一个`Promise`实例(存在异步代码)，使用`Promise.prototype.catch`来捕捉 fn 运行中的异常。
 ## 3、总结
 
-`eventsMixin`函数初始化了`Vue`的四个原型方法：`$on`、`$off`、`$once`、`$emit`，使用了典型的发布订阅模式，`initEvents`初始化了当前实例上的`_events`集合，绑定了来自于父级预置节点的事件对象，如果有自定义事件，也会同样绑定。
+`eventsMixin`函数初始化了`Vue`的四个原型方法：`$on`、`$off`、`$once`、`$emit`，使用了典型的发布订阅模式，`initEvents`初始化了当前实例上的`_events`集合，绑定了来自于父组件预置节点的事件对象，同时你也可以自己订阅一个事件。

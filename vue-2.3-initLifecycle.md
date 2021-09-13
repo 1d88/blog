@@ -1,4 +1,4 @@
-# initLifecycle
+# 实例的生命周期
 
 ## 1、lifecycleMixin
 

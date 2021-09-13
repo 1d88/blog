@@ -437,7 +437,7 @@ if (config.isReservedTag(tag)) {
   // unknown or unlisted namespaced elements
   // 未知 和 没有列出的 元素
   // check at runtime because it may get assigned a namespace when its parent normalizes children
-  // 在运行时检验它，因为在父级 归一化 children的时候 它会被断言一个命名空间
+  // 在运行时检验它，因为在父节点 归一化 children的时候 它会被断言一个命名空间
   vnode = new VNode(tag, data, children, undefined, undefined, context);
 }
 ```

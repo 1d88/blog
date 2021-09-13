@@ -1,6 +1,124 @@
-# initRender
+# 实例的渲染
 
 初始化渲染，在初始化完事件之后开始触发。初始化渲染之后，就会调用`beforeCreated`的方法
+
+## 1、renderMixin
+
+```js
+function renderMixin(Vue) {
+  // install runtime convenience helpers
+  installRenderHelpers(Vue.prototype);
+
+  Vue.prototype.$nextTick = function(fn) {};
+
+  Vue.prototype._render = function() {};
+}
+```
+
+### 1.1、Vue.prototype.\$nextTick
+
+```js
+Vue.prototype.$nextTick = function(fn) {
+  return nextTick(fn, this);
+};
+```
+
+`Vue.prototype.$nextTick`调用了 `nextTick`，`nextTick` 涉及`watcher`的调度和`event loop`，之后在`nextTick`的章节讨论。
+
+### 1.2、Vue.prototype.\_render
+
+将这个函数分为三部分来讨论，第一部分：
+
+```js
+Vue.prototype._render = function() {
+  var vm = this;
+  var ref = vm.$options;
+  // 这个render肯定是存在的，在 mountComponent 里，如果不存在render，就会创建一个空节点
+  var render = ref.render;
+  var _parentVnode = ref._parentVnode;
+
+  if (_parentVnode) {
+    vm.$scopedSlots = normalizeScopedSlots(
+      _parentVnode.data.scopedSlots,
+      vm.$slots,
+      vm.$scopedSlots
+    );
+  }
+
+  // set parent vnode. this allows render functions to have access
+  // to the data on the placeholder node.
+  vm.$vnode = _parentVnode;
+  // ...
+};
+```
+
+`_render`函数通过当前实例的选项`$options`获取`render`，`render`返回当前实例的`vnode`树。然后获取`_parentVnode`，`_parentVnode`是父组件中的预置`vnode`节点，如果这个节点存在，归一化当前的插槽，并且赋值到当前实例的`$scopedSlots`上，`normalizeScopedSlots`细节会在插槽详细介绍。
+
+实例的`$vnode`是当前实例的根`vnode`节点，这里设置了父级的预置节点，这个就可以访问预置节点上面的数据。第二部分：
+
+```js
+// ...
+// render self
+var vnode;
+try {
+  // There's no need to maintain a stack because all render fns are called
+  // separately from one another. Nested component's render fns are called
+  // when parent component is patched.
+  currentRenderingInstance = vm;
+  vnode = render.call(vm._renderProxy, vm.$createElement);
+} catch (e) {
+  handleError(e, vm, "render");
+  // return error render result,
+  // or previous vnode to prevent render error causing blank component
+  /* istanbul ignore else */
+  if (vm.$options.renderError) {
+    try {
+      vnode = vm.$options.renderError.call(
+        vm._renderProxy,
+        vm.$createElement,
+        e
+      );
+    } catch (e) {
+      handleError(e, vm, "renderError");
+      vnode = vm._vnode;
+    }
+  } else {
+    vnode = vm._vnode;
+  }
+} finally {
+  currentRenderingInstance = null;
+}
+// ...
+```
+
+这部分是生成`vnode`的代码，指定当前实例为`currentRenderingInstance`；这里作者也备注了*并没有必要使用一个栈，因为渲染函数一个一个地独立被调用，嵌套组件的渲染函数都是父组件的打完补丁才轮到子组件*。所以只要一个 flag 来标识当然的渲染中实例就可以。
+
+`vnode = render.call(vm._renderProxy, vm.$createElement)`在`实例的属性代理`讲过，属性的代理为了有更好警告提示。不论通过手写`render`或者编译的`template`，都存在很大的几率报错，所以使用了`try...catch...`来捕获`render`的执行。如果走入了 catch 代码块，开发者定义过`renderError`，那么执行 `renderError` 的错误处理；
+只要走入错误，`vnode`就会被设置为父组件预置的节点`vnode = vm._vnode`。
+
+```js
+// if the returned array contains only a single node, allow it
+// 这个问题 ：https://github.com/vuejs/vue/issues/8056
+if (Array.isArray(vnode) && vnode.length === 1) {
+  vnode = vnode[0];
+}
+// return empty vnode in case the render function errored out
+if (!(vnode instanceof VNode)) {
+  if (Array.isArray(vnode)) {
+    warn(
+      "Multiple root nodes returned from render function. Render function " +
+        "should return a single root node.",
+      vm
+    );
+  }
+  vnode = createEmptyVNode();
+}
+// set parent
+vnode.parent = _parentVnode;
+return vnode;
+```
+
+## 2、initRender
 
 ```js
 function initRender(vm) {
@@ -78,7 +196,7 @@ function initRender(vm) {
 
 这个方法主要是初始化了插槽和作用域插槽，定义了`_c`和`$createElement`方法。构建了`$attr`和`$listeners`的响应式。
 
-## 1.1、构建插槽方法
+### 2.1、构建插槽方法
 
 ```js
 /**
@@ -135,7 +253,7 @@ function resolveSlots(children, context) {
 
 简单过一下这个函数，之后探讨插槽重点深入
 
-## 2.1、`vm._staticTrees`
+### 2.2、`vm._staticTrees`
 
 ```js
 function renderStatic(index, isInFor) {
@@ -227,12 +345,12 @@ var staticRenderFns = [
 ];
 ```
 
-### 4.2、\_c vs \$createElement
+### 2.3、\_c vs \$createElement
 
 1. `_c`内部使用，不需要每次都归一化，只需要扁平化 children 数组就可以；
 2. `$createElement`作为 h 传入到`$options.render`中，那么手写的 render 有可能存在很多不规范的地方，因此需要校验和归一化。
 
-### 4.3、$attrs 和 $listeners 的响应式
+### 2.4、$attrs 和 $listeners 的响应式
 
 `$attr`字段是当前`vm`除了`class`和`style`之外的标签属性对象。在`updateChildComponent`函数中维护
 `vm.$attrs = parentVnode.data.attrs || emptyObject;`；当`inheritAttrs`为 false 时，我们可以通过`v-bind:$attrs`将父类预置节点上的属性“转嫁”到子类的根节点上，给与响应式的意义在于，如果父类预置节点上的属性有变化，那么子类也会触发响应式。`$listeners`同理。

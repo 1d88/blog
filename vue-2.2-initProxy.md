@@ -1,4 +1,4 @@
-# beforeCreate 之前
+# 实例的属性代理
 
 > 我们已经获得了合并之后的选项，接下来我们要`initProxy`，`initEvents`，`initRender`，然后出发 hook`beforeCreate`
 
