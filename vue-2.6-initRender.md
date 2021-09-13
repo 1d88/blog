@@ -387,4 +387,4 @@ var staticRenderFns = [
 
 `renderMixin`维护了`_render`和`$nextTick`的两个方法，实例的内部方法`_render`是非函数组件调用生成`vnode`的函数，触发时机在调用`vm._update`时，第一参数传入的`vnode`，就是依赖`_render`生成的：`vm._update(vm._render(), hydrating)`，可以说这个函数是构建虚拟 dom 最顶层的方法。
 
-当`vm`调用`initRender`后，和渲染相关的参数基本初始化完毕：`_vnode`的定义，是否静态树，预置节点，渲染上下文，插槽相关以及`$attr`和`$listener`的响应式处理。
+当`vm`调用`initRender`后，和渲染相关的参数基本初始化完毕：`_vnode`的定义，是否静态树，预置节点，渲染上下文，插槽相关以及`$attrs`和`$listeners`的响应式处理。
