@@ -140,7 +140,7 @@ function initProvide(vm) {
 
 `initProvide`比较简单，就是将`vm.$options.provide`赋值给`vm._provided`，以供`子孙`组件在执行`resolveInject`的时候可以找到。
 
-## 总结
+## 3、总结
 
 通过 inject/provide，我们可以在子类组件访问跨级父组件；是针对于`this.$parent.$parent.$parent.doThis()`这种代码的解决方案；`provide`传递是一个值或者引用，意味着我们可以调用提供者的任何方法或者属性。
 
