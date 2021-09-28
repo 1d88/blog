@@ -353,6 +353,11 @@ function assertProp(prop, name, value, vm, absent) {
 
 `propsOptions`是初始化时选项的`props`属性，也可以通过`vm.$options.props`访问，`vm.$options`继承了`vm.constructor.options`；`vm.$options.propsData`是父组件传递给子组件的值
 
-`validateProp`处理`Boolean`的特殊情况，处理了传入值是`undefined`的情况，校验了`required、type、validator`，返回了一个有效的值。
+`validateProp`函数是`initProps`的核心，简单来看，`validateProp`主要做了四个事情：
 
-最终将这个值响应式处理
+1. 获取`var value = propsData[key];`；
+2. 处理 prop.type 是布尔值的情况，干预 value 的取值；
+3. 如果 `value` 父组件没有提供，那么计算默认值，并且为其添加响应式；
+4. 以上都是取值操作，最后通过`assertProp`校验并发出警告。返回这个`value`。
+
+最终为这个`value`添加响应式处理
