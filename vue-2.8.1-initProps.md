@@ -1,21 +1,24 @@
 # initProps
 
 ```js
+function initState(vm) {
+  vm._watchers = [];
+  var opts = vm.$options;
+  if (opts.props) {
+    initProps(vm, opts.props);
+  }
+}
 function initProps(vm, propsOptions) {
   var propsData = vm.$options.propsData || {};
   var props = (vm._props = {});
-  // cache prop keys so that future props updates can iterate using Array
-  // instead of dynamic object key enumeration.
   var keys = (vm.$options._propKeys = []);
   var isRoot = !vm.$parent;
-  // root instance props should be converted
   if (!isRoot) {
     toggleObserving(false);
   }
   var loop = function(key) {
     keys.push(key);
     var value = validateProp(key, propsOptions, propsData, vm);
-    /* istanbul ignore else */
     {
       var hyphenatedKey = hyphenate(key);
       if (
@@ -43,14 +46,10 @@ function initProps(vm, propsOptions) {
         }
       });
     }
-    // static props are already proxied on the component's prototype
-    // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
     if (!(key in vm)) {
       proxy(vm, "_props", key);
     }
   };
-
   for (var key in propsOptions) loop(key);
   toggleObserving(true);
 }
