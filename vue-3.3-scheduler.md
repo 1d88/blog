@@ -365,3 +365,166 @@ function callUpdatedHooks(queue) {
 整个`flushSchedulerQueue`在下一个时间片执行，`flushSchedulerQueue`和视图的渲染在一个宏任务执行，因此`hook:updated`调用时，真实 dom 已经更新了。
 
 最后通知`devtool`。
+
+### 2.3、`getNow`函数
+
+```js
+if (inBrowser && !isIE) {
+  const performance = window.performance;
+  if (
+    performance &&
+    typeof performance.now === "function" &&
+    getNow() > document.createEvent("Event").timeStamp
+  ) {
+    getNow = () => performance.now();
+  }
+}
+```
+
+如果处在浏览器环境，并且不是 IE 浏览器。使用`performance`API。获取一个高精度时间。
+
+## 3、`nextTick`
+
+```js
+var isUsingMicroTask = false;
+var callbacks = [];
+var pending = false;
+```
+
+变量说明：
+
+- `isUsingMicroTask`是否在使用微任务
+- `callbacks`：函数数组
+- `pending`：代办状态
+
+### 3.1、`flushCallbacks`函数
+
+```js
+function flushCallbacks() {
+  pending = false;
+  const copies = callbacks.slice(0);
+  callbacks.length = 0;
+  for (let i = 0; i < copies.length; i++) {
+    copies[i]();
+  }
+}
+```
+
+拷贝当前`callbacks`数组到`copies`，然后清空`callbacks`数组。遍历并执行`copies`。
+
+### 3.2、`timerFunc`函数
+
+#### 使用`Promise`：
+
+条件：支持`Promise`
+
+```js
+var p = Promise.resolve();
+timerFunc = function() {
+  p.then(flushCallbacks);
+  if (isIOS) {
+    setTimeout(noop);
+  }
+};
+isUsingMicroTask = true;
+```
+
+使用`Promise.prototype.then`微任务来执行`flushCallbacks`函数。
+
+```js
+if (isIOS) {
+  setTimeout(noop);
+}
+```
+
+兼容 iOS`UIwebview`一些怪异的行为。设置`isUsingMicroTask`为`true`，在事件绑定有兼容处理。
+
+#### 使用`MutationObserver`
+
+条件：
+
+- 不支持`Promise`
+- 不是 IE 浏览器
+- 支持`MutationObserver`
+
+```js
+var counter = 1;
+var observer = new MutationObserver(flushCallbacks);
+var textNode = document.createTextNode(String(counter));
+observer.observe(textNode, {
+  characterData: true,
+});
+timerFunc = function() {
+  counter = (counter + 1) % 2;
+  textNode.data = String(counter);
+};
+isUsingMicroTask = true;
+```
+
+使用`MutationObserver`微任务，监控`Dom`变化，当调用`timerFunc`时，设置`textNode.data`而触发`flushCallbacks`回调；设置`isUsingMicroTask`为`true`。
+
+#### 使用`setImmediate`
+
+条件:
+
+- 不支持`Promise`
+- 不支持`MutationObserver`
+- 支持`setImmediate`
+
+```js
+timerFunc = function() {
+  setImmediate(flushCallbacks);
+};
+```
+
+使用宏任务`setImmediate`执行`flushCallbacks`，如果以上都不支持，那么使用`setTimeout`：
+
+```js
+timerFunc = function() {
+  setTimeout(flushCallbacks, 0);
+};
+```
+
+### 3.3、`nextTick`函数
+
+```js
+function nextTick(cb, ctx) {
+  var _resolve;
+  callbacks.push(function() {
+    if (cb) {
+      try {
+        cb.call(ctx);
+      } catch (e) {
+        handleError(e, ctx, "nextTick");
+      }
+    } else if (_resolve) {
+      _resolve(ctx);
+    }
+  });
+  if (!pending) {
+    pending = true;
+    timerFunc();
+  }
+  // $flow-disable-line
+  if (!cb && typeof Promise !== "undefined") {
+    return new Promise(function(resolve) {
+      _resolve = resolve;
+    });
+  }
+}
+```
+
+向`callbacks`推入一个匿名函数：
+
+- 如果`cb`存在，说明是`nextTick(cb)`的场景，使用`try...catch...`捕捉`cb`的执行异常；
+- 如果`cb`不存在，说明是`nextTick().then(cb)`的场景。
+
+如果`pending = false`执行`timerFunc`。
+
+最终是构建返回一个`Promise`实例。
+
+综上，整体流程是：
+场景一：
+`nextTick(cb)`向`callbacks`推入一个匿名函数包裹`cb函数`，当前`pending = false`，执行`timerFunc`；`timerFunc`内部使用了`Promise.resolve().then(flushCallbacks)`这里开始执行微任务，`flushCallbacks`函数重置`pending = false`，遍历执行`callbacks`，并且清空`callbacks`。
+场景二：
+`nextTick()`向`callbacks`推入一个匿名函数包裹`_resolve(ctx)`，当前`pending = false`，执行`timerFunc`；`timerFunc`内部使用了`Promise.resolve().then(flushCallbacks)`这里是微任务，然后返回一个`Promise`实例。至此宏任务执行完毕，当`nextTick().then(cb)`，开始执行微任务：`flushCallbacks`函数重置`pending = false`，遍历执行`callbacks`，并且清空`callbacks`。
