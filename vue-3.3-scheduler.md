@@ -1,10 +1,13 @@
-# `Scheduler`
+# `Scheduler`调度
 
-`Watcher.prototype.update`中`queueWatcher`函数，也是线上环境自定义`watcher`必须调用的分支：如果不是`lazy watcher`、不需要同步执行`watcher`，那么`watcher`将进入一个队列函数`queueWatcher`：
+`Watcher.prototype.update`中`queueWatcher`函数，也是线上环境自定义`watcher`肯定调用的分支：如果不是`lazy watcher`、不需要同步执行`watcher`，那么`watcher`将进入一个队列函数`queueWatcher`：
+
+## 1、`queueWatcher`函数
+
+## 1.1、变量的解释
 
 ```js
 var MAX_UPDATE_COUNT = 100;
-
 var queue = [];
 var activatedChildren = [];
 var has = {};
@@ -12,6 +15,20 @@ var circular = {};
 var waiting = false;
 var flushing = false;
 var index = 0;
+```
+
+- MAX_UPDATE_COUNT：最大的更新次数
+- queue：观察者队列，里面放的是`Watcher`实例
+- activatedChildren：活动的子组件
+- has：是否已经在队列中，一个以`watcher.id`为 key 的对象
+- circular：循环调用的集合，一个以`watcher.id`为 key 的对象
+- waiting：等待当前的队列执行完毕
+- flushing：队列是否在**执行**过程中
+- index：当然的数组下标
+
+## 1.2、排队`Watcher`实例
+
+```js
 function queueWatcher(watcher) {
   var id = watcher.id;
   if (has[id] == null) {
@@ -19,18 +36,14 @@ function queueWatcher(watcher) {
     if (!flushing) {
       queue.push(watcher);
     } else {
-      // if already flushing, splice the watcher based on its id
-      // if already past its id, it will be run next immediately.
       var i = queue.length - 1;
       while (i > index && queue[i].id > watcher.id) {
         i--;
       }
       queue.splice(i + 1, 0, watcher);
     }
-    // queue the flush
     if (!waiting) {
       waiting = true;
-
       if (!config.async) {
         flushSchedulerQueue();
         return;
@@ -41,9 +54,67 @@ function queueWatcher(watcher) {
 }
 ```
 
-判断`has`是否存在这个 ID，如果不存在，添加这个 ID 到 `has` 缓存对象中。如果`flushing`是 false，表示没有在冲洗中，那么将当前的`watcher`放入队列数组中去；如果正在处于冲洗过程中，那么将当前的`watcher`放入队列的合适位置；如果不需要等待执行`flushSchedulerQueue`函数，这里如果配置了`config.async = false`,表示开启同步的方法更新`watcher`。否则在下一个时间片执行`flushSchedulerQueue`
+判断当前`watcher`是否加入到队列中，如果已经添加进入了队列中，即不做任何处理。
+
+是否正在冲洗队列：
+
+- 如果`flushing=true`，表示正在冲洗队列；因此插入到队列合适的位置：（`index`的递增在`flushSchedulerQueue`函数中，遍历执行队列中的`watcher.run`），在`$options.watch`定义的 cb 函数中操作有`watcher`绑定的字段会触发这种情况:
 
 ```js
+// 配置
+data() {
+  return {
+    test1: 22,
+    test: 1234,
+  };
+},
+watch: {
+  test1() {},
+  test() {
+    this.test1 = 3;
+  },
+},
+mounted() {
+  this.test = 4;
+},
+// 源码注释
+function queueWatcher(watcher) {
+  var id = watcher.id;
+  console.log(id, waiting);
+  // ...
+}
+```
+
+输出结果：
+
+<img src="./images/queueWatcherconsole.jpg" width="200">
+
+1. 队列下标`index <= i`的位置；（`i`从队列中最后一个元素开始。`index`从队列第一元素开始）。
+2. 或者刚好比队列中**创建晚**的元素位置。（创建晚的`watcher.id`比较大）
+
+所以包含以下两种情况：
+
+1. 如果还没有超过当前的 id，那么这个`watcher`在队列等待；
+2. 如果超过了当前的 id，那么会立即执行。
+
+- 如果`flushing=false`，向队列添加这个`watcher`。
+
+队列的冲洗过程是一次一次进行的。只有当`waiting=false`时，才可以进入到`flushSchedulerQueue`函数的执行，当然分两种情况：
+
+- `config.async`为`false`，关掉异步的`watcher`队列的调度。同步执行队列意味造成性能的问题，针对于`Vue`测试工具的使用。
+- 使用`nextTick`下个时间片执行`flushSchedulerQueue`。
+
+综上，串一下执行过程，针对于线上的场景：
+当设置一个值的时候，响应式`reactiveSetter`函数调用了`dep.notify`，然后遍历`dep.subs`调用了`watcher.update`方法，`watcher.update`内部调用了`queueWatcher`，将当前要执行的`watcher`添加到队列中，如果当前队列正在执行冲洗操作，那么会添加到当前的队列中执行，如果没有进行冲洗操作，直接`push`到队列中。
+
+渲染`watcher`初始化时，由于没有调用`update`，并不会进入队列，因此调度排队只会发生在设置一个值得时候，当然`$forceUpdate`的调用除外，他会强制调用**渲染`watcher.update`**。
+
+队列的执行不存在并行，只有一个队列执行结束，才会有下一个队列执行。
+
+## 1.2、时间精度的问题
+
+```js
+var currentFlushTimestamp = 0;
 function flushSchedulerQueue() {
   currentFlushTimestamp = getNow();
   flushing = true;
@@ -173,3 +244,12 @@ function callUpdatedHooks(queue) {
 `callUpdatedHooks`遍历调用`hook:updated`
 
 7. 通知`devtool`。
+
+```js
+function queueActivatedComponent(vm) {
+  // setting _inactive to false here so that a render function can
+  // rely on checking whether it's in an inactive tree (e.g. router-view)
+  vm._inactive = false;
+  activatedChildren.push(vm);
+}
+```
