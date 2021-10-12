@@ -145,6 +145,45 @@ Watcher.prototype.get = function get() {
 
 如果是`this.deep = true`，监听对象内部的所有变化，执行`traverse`收集依赖，将`Dep.target`的指向`null`，并执行`this.cleanupDeps()`，返回 value。
 
+`traverse`函数，使用`Set.add`递归添加每个属性，从而访问了`reactiveGetter`函数。
+
+```js
+function traverse(val) {
+  _traverse(val, seenObjects);
+  seenObjects.clear();
+}
+function _traverse(val, seen) {
+  var i, keys;
+  var isA = Array.isArray(val);
+  if (
+    (!isA && !isObject(val)) ||
+    Object.isFrozen(val) ||
+    val instanceof VNode
+  ) {
+    return;
+  }
+  if (val.__ob__) {
+    var depId = val.__ob__.dep.id;
+    if (seen.has(depId)) {
+      return;
+    }
+    seen.add(depId);
+  }
+  if (isA) {
+    i = val.length;
+    while (i--) {
+      _traverse(val[i], seen);
+    }
+  } else {
+    keys = Object.keys(val);
+    i = keys.length;
+    while (i--) {
+      _traverse(val[keys[i]], seen);
+    }
+  }
+}
+```
+
 从`get`方法我们可以看出，在计算完成结果之后，会通过调用`this.cleanupDeps`清空掉依赖；我们都知道 vue observer 是在`reactiveGetter`函数收集依赖，在`reactiveSetter`函数通知更新，整个过程：
 
 1. `initProps` 和 `initData` 之后才会执行 `initWatch`，此时 `_props` 和 `_data` 已经被代理到`vm`上；
