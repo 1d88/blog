@@ -721,7 +721,7 @@ function createWatcher(vm, expOrFn, handler, options) {
 
 `nativeWatch`:火狐浏览器拥有 `Object.prototype.watch` 方法，排除掉这种情况。枚举`vm.$options.watch`，使用`createWatcher`来构建一个自定义`Watcher`；`createWatcher`函数内部还是调用了`vm.$watcher`。详细原理在响应式讨论。
 
-到这里为止，`initState`函数就讨论完了。在执行完`initProvide`之后（在 inject、provide 已经讨论完了），就会调用`callHook(vm, "created");`，实例的状态也基本初始化完成。接下来准备挂载 dom 实例。
+到这里为止，`initState`函数就讨论完了。在执行完`initProvide`之后（在 inject、provide 已经讨论完了），就会调用`callHook(vm, "created");`，实例的状态也基本初始化完成。接下来准备挂载真实 Dom。
 
 ```js
 // 如果提供el那么挂载

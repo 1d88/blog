@@ -139,7 +139,7 @@ const app = new Vue({
     child,
   },
   template: `<child></child>`,
-}).\$mount("#app");
+}).$mount("#app");
 ```
 
 注：函数组件不存在`vm`，并不会走入`_render`。而是使用`createFunctionalComponent`生成函数组件，内部不会校验多根问题。
