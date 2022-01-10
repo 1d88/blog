@@ -1,6 +1,8 @@
 # patch
 
-> 通过前面的讨论，我们已经完成了`Vue`初始化，在`vm.$mount`之后，我们调用`vm._render`，最终执行的是`vm.__patch__`。`vm.__patch__`就是我们常说的 vdom 的 diff 算法，但实际上这只是 patch 方法中的一个分支，还有很多其他的逻辑。
+> diff 算法，ssr 客户端激活
+
+通过前面的讨论，我们已经完成了`Vue`初始化，在`vm.$mount`之后，我们调用`vm._render`，最终执行的是`vm.__patch__`。`vm.__patch__`就是我们常说的 vdom 的 diff 算法，但实际上这只是 patch 方法中的一个分支，还有很多其他的逻辑。
 
 ## createPatchFunction
 
@@ -44,7 +46,7 @@ var nodeOps = /*#__PURE__*/ Object.freeze({
 
 ### 参数`modules`
 
-modules 是一个数组，包含了以下所有的对象，它的作用是注册 vnode 的生命周期函数，在关键的生命周节点，做新建、更新、销毁等操作。
+modules 是一个数组，包含了以下对象，它的作用是注册 vnode 的生命周期函数，在关键的生命周节点，做新建、更新、销毁等操作。
 
 ```js
 var platformModules = [attrs, klass, events, domProps, style, transition];
@@ -53,12 +55,12 @@ var modules = platformModules.concat(baseModules);
 
 platformModules 定义的 vnode 的生命周期函数：
 
-- `attrs`:定义 create 和 update 的函数会更新属性
-- `klass`:定义 create 和 update 的函数会更新 class 样式
-- `events`:定义 create 和 update 的函数会更新事件
-- `domProps`:定义 create 和 update 的函数会更新 js 对象的属性
-- `style`:定义 create 和 update 的函数会更新内联样式
-- `transition`:定义 create、activate 和 remove 的函数会更新过度
+- `attrs`:定义在 create 和 update 的生命周期会更新属性
+- `klass`:定义在 create 和 update 的函数会更新 class 样式
+- `events`:定义在 create 和 update 的生命周期会更新事件
+- `domProps`:定义在 create 和 update 的生命周期会更新 js 对象的属性
+- `style`:定义在 create 和 update 的生命周期会更新内联样式
+- `transition`:定义在 create、activate 和 remove 的生命周期会更新过度
 
 ```js
 var attrs = {
@@ -163,11 +165,12 @@ function createPatchFunction(backend) {
 ```
 
 最终的数据结构如下图所示：
+
 <img src="./images/vnodehooks.png" width="500">
 
 ### 总结
 
-到目前为止，我们分析了`createPatchFunction`函数的参数`nodeOps`和`modules`，并且知道了`cbs`的数据结构。`nodeOps`是一个操作真实 dom 的工具对象，而`modules`是属性、样式、事件、内容、styleScoped、过度、指令、ref 的生命周期函数的定义集合。指明一个 vnode 到真实 dom 的创建、更新、移动、销毁过程中，需要更新哪些维度的信息。
+到目前为止，我们分析了`createPatchFunction`函数的参数`nodeOps`和`modules`，并且知道了`cbs`的数据结构。`nodeOps`是一个操作 dom 的工具对象，而`modules`是属性、样式、事件、内容、styleScoped、过度、指令、ref 的生命周期函数的定义集合。指明一个 vnode 到真实 dom 的创建、更新、移动、销毁过程中，需要更新哪些维度的信息。
 
 ## patch(oldVnode, vnode, hydrating, removeOnly)
 
@@ -295,9 +298,9 @@ if (isRealElement) {
 
 通过`hydrate(oldVnode, vnode, insertedVnodeQueue)`这个函数来判断是否需要去激活，如果返回`true`,调用`invokeInsertHook`实现激活，并且返回整个旧节点，完成整个的`patch`过程。否则会有一个警告，告诉开发者激活失败。一般造成这个问题的原因，除了上面说到的标签标准化的问题，还有可能存在不通用的、带有副作用的代码。比如一个参与渲染的随机函数造成 dom 不一致。
 
-不论激活没有成功，或者非 ssr 项目，都会将 oldVnode(这里是一个真实的 dom 对象) 作为 `elm` 会被挂载在一个空的 vnode 上。
+激活没有成功，或者非 ssr 项目，都会将 oldVnode(这里是一个真实的 dom 对象) 作为 `elm` 会被挂载在一个空的 vnode 上。
 
-只有在 **ssr 项目并且激活成功**的情况下，不会走到下面的逻辑：
+除了 **ssr 项目并且激活成功**的情况之外，都会走到下面的逻辑：
 
 ```js
 // replacing existing element
@@ -316,9 +319,9 @@ createElm(
 );
 ```
 
-从这里开始，vue 开始创建应用的真实 dom。`patchVnode`的前提是`oldVnode`不是一个真实的 dom 元素节点，并且和 vnode 有着相同的“类型”（满足于 sameVnode 函数）。比如我们的应用根节点是`div#app`，oldElm 是当前应用的根节点，parentElm 是`div#app`的父级（比如像`body`节点）。接下来调用`createElm`创建了当前组件的真实的 dom 节点，并将结果保存在了`vnode.elm`中。
+从这里开始，vue 开始创建应用的真实 dom。`patchVnode`的前提是`oldVnode`不是一个真实的 dom 元素节点，并且和 vnode 有着相同的“类型”（满足于 sameVnode 函数）。例如：我们的应用根节点是`div#app`，oldElm 是当前应用的根节点，parentElm 是`div#app`的父节点（如`body`节点）。接下来调用`createElm`创建了当前组件的真实的 dom 节点，并将结果保存在了`vnode.elm`中。
 
-下面我们来更新父组件中的预置节点，针对于下面的场景：
+应用的真实的 dom 已经构建成功了，针对于子组件，下面我们来更新父组件中的预置节点，针对于下面的场景：
 
 ```js
 const child = Vue.extend({
@@ -345,7 +348,7 @@ const app = new Vue({
 });
 ```
 
-子组件的根节点依赖于变量`a`，并且根节点不是 someVnode
+当子组件的根节点依赖于变量`a`的值，并且根节点不满足 someVnode 的时候，走入下面的代码。目的是更新父级的预置节点。
 
 ```js
 // 更新父组件中的预置节点，前提的条件是父组件存在;
@@ -354,17 +357,20 @@ if (isDef(vnode.parent)) {
   var ancestor = vnode.parent;
   var patchable = isPatchable(vnode);
   while (ancestor) {
+    // 执行祖先的销毁方法，销毁当前 ref 和 指令
     for (var i = 0; i < cbs.destroy.length; ++i) {
       cbs.destroy[i](ancestor);
     }
     ancestor.elm = vnode.elm;
     if (patchable) {
       for (var i$1 = 0; i$1 < cbs.create.length; ++i$1) {
+        // 新建 class，css，......
         cbs.create[i$1](emptyNode, ancestor);
       }
       // #6513
       // invoke insert hooks that may have been merged by create hooks.
       // e.g. for directives that uses the "inserted" hook.
+      // 特殊的处理 inserted
       var insert = ancestor.data.hook.insert;
       if (insert.merged) {
         // start at index 1 to avoid re-invoking component mounted hook
@@ -380,7 +386,7 @@ if (isDef(vnode.parent)) {
 }
 ```
 
-一个 vnode 是否可以打补丁呢？
+一个 vnode 是否可以打补丁呢？isPatchable 函数的逻辑如下：
 
 ```js
 // 是否可以打补丁
@@ -396,7 +402,7 @@ function isPatchable(vnode) {
 
 通过判断`vnode.componentInstance._vnode`的 tag 是否存在，`vnode.componentInstance`指向当前的 vm 实例，`vm._vnode`指的是当前根节点。
 
-上面代码触发的场景是：组件的根节点发生变化的时候，并且`sameVnode`返回 false，组件 vnode 的`parent`即不为空，这是一个递归逻辑，查找 vnode 的父级，调用`destroy hook`。销毁 vnode 父级的节点；这个递归的`destroy`为了销毁之前祖先节点，释放内存。然后通过`create`新建一个祖先。如果可以打补丁，调用`create hook`，调用`ancestor`的`insert cb`；如果不需要打补丁，调用`registerRef`函数。
+上面代码触发的场景是：组件的根节点发生变化的时候，并且`sameVnode`返回 false，组件 vnode 的`parent`即不为空，这是一个递归逻辑，查找 vnode 的父级，调用`destroy hook`。销毁 vnode 父级的节点；这是为了销毁之前祖先节点，释放内存。然后通过`create`新建一个祖先。如果可以打补丁，调用`create hook`，调用`ancestor`的`insert cb`；如果不需要打补丁，调用`registerRef`函数。
 最终如果 parentElm 存在，使用`removeVnodes`函数移除 oldVnode，或者 oldVnode.tag 存在，使用`invokeDestroyHook`销毁 oldVnode。
 
 ```js
