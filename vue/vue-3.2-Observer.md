@@ -67,7 +67,7 @@ var Observer = function Observer(value) {
 - 如果传入的对象是一个数组，调用`this.observeArray`，
 - 如果是个对像，调用`this.walk`。
 
-当传入的 value 是一个数组的时候，如果当前的浏览器支持`"__proto__" in {}`，使用`protoAugment`方法，否则使用`copyAugment`。（\***\*proto\*\***有更多的浏览器支持，并且使一个标准，未来有更多浏览器实现它，也可以使用`setPrototypeOf`）；
+当传入的 value 是一个数组的时候，如果当前的浏览器支持`"__proto__" in {}`，使用`protoAugment`方法，否则使用`copyAugment`。（\***\*proto\*\***有更多的浏览器支持，并且是一个标准，未来有更多浏览器实现它，也可以使用`setPrototypeOf`）；
 
 ```js
 /**

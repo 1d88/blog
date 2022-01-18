@@ -421,6 +421,31 @@ if (isDef(parentElm)) {
 
 ## invokeDestroyHook
 
+```js
+  function invokeDestroyHook(vnode) {
+    var i, j;
+    var data = vnode.data;
+    if (isDef(data)) {
+      if (isDef((i = data.hook)) && isDef((i = i.destroy))) {
+        i(vnode);
+      }
+      for (i = 0; i < cbs.destroy.length; ++i) {
+        cbs.destroy[i](vnode);
+      }
+    }
+    if (isDef((i = vnode.children))) {
+      for (j = 0; j < vnode.children.length; ++j) {
+        invokeDestroyHook(vnode.children[j]);
+      }
+    }
+  }
+```
+获取 `vnode` 的`data`属性，如果存在`vnode.data.hook.destroy`，调用它，执行`createPatchFunction`中`cbs.destroy`，调用`vnode`的`destory`和`unbindDirectives`。递归删除`vnode`的子集节点。
+
+`vnode.data.hook`和`cbs`有什么区别呢？
+
+`vnode.data.hook`维护的是
+
 ## createElm
 
 ## registerRef
