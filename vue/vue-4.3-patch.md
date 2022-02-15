@@ -444,9 +444,130 @@ if (isDef(parentElm)) {
 
 `vnode.data.hook`和`cbs`有什么区别呢？
 
-`vnode.data.hook`维护的是
+`cbs`上面已经描述过，维护一个以 hook 元素为 key 的集合，在vnode新建或者销毁时候做相关的组件、属性之类的更新或者销毁操作，这个过程是程度内置的，用户不可以操作。
+
+`vnode.data.hook`维护的是vnode的hook函数，在vnode生命周期中调用，和此hook相关的函数是`mergeVNodeHook`如下：
+```js
+function mergeVNodeHook(def, hookKey, hook) {
+    if (def instanceof VNode) {
+      def = def.data.hook || (def.data.hook = {});
+    }
+    var invoker;
+    var oldHook = def[hookKey];
+
+    function wrappedHook() {
+      hook.apply(this, arguments);
+      // important: remove merged hook to ensure it's called only once
+      // and prevent memory leak
+      remove(invoker.fns, wrappedHook);
+    }
+
+    if (isUndef(oldHook)) {
+      // no existing hook
+      invoker = createFnInvoker([wrappedHook]);
+    } else {
+      /* istanbul ignore if */
+      if (isDef(oldHook.fns) && isTrue(oldHook.merged)) {
+        // already a merged invoker
+        invoker = oldHook;
+        invoker.fns.push(wrappedHook);
+      } else {
+        // existing plain hook
+        invoker = createFnInvoker([oldHook, wrappedHook]);
+      }
+    }
+
+    invoker.merged = true;
+    def[hookKey] = invoker;
+  }
+
+```
+判定并且初始化`def.data.hook = {}`，如果没有定义当前`key`对用的`hook`，调用`createFnInvoker`生成一个`invoker`对象。`invoker`函数可以更好进行错误的捕获，包装了当前的`hook`函数。例如 insert hook:`vnode.data.hook.insert`指向一个`invoker``invoker.fns`里面存放hook函数，并且`invoker.merged` 为 `true`。
+ 
+ 所以下面是`vnode`所有的`hook`:
+ - insert 插入之后
+ - postpatch 更新之后
+ - afterLeave 过度，离开之后
+ - afterEnter 过度，进入之后
+ - enterCancelled 过度，进入取消时
+ - delayLeave 过度，延迟进入
+
 
 ## createElm
+
+根据vnode节点创建一个真实的dom
+
+```js
+ function createElm(
+      vnode,
+      insertedVnodeQueue,
+      parentElm,
+      refElm,
+      nested,
+      ownerArray,
+      index
+    ) {
+      if (isDef(vnode.elm) && isDef(ownerArray)) {
+        // This vnode was used in a previous render!
+        // now it's used as a new node, overwriting its elm would cause
+        // potential patch errors down the road when it's used as an insertion
+        // reference node. Instead, we clone the node on-demand before creating
+        // associated DOM element for it.
+        vnode = ownerArray[index] = cloneVNode(vnode);
+      }
+
+      vnode.isRootInsert = !nested; // for transition enter check
+      if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+        return;
+      }
+
+      var data = vnode.data;
+      var children = vnode.children;
+      var tag = vnode.tag;
+      if (isDef(tag)) {
+        {
+          if (data && data.pre) {
+            creatingElmInVPre++;
+          }
+          if (isUnknownElement$$1(vnode, creatingElmInVPre)) {
+            warn(
+              "Unknown custom element: <" +
+                tag +
+                "> - did you " +
+                "register the component correctly? For recursive components, " +
+                'make sure to provide the "name" option.',
+              vnode.context
+            );
+          }
+        }
+
+        vnode.elm = vnode.ns
+          ? nodeOps.createElementNS(vnode.ns, tag)
+          : nodeOps.createElement(tag, vnode);
+        setScope(vnode);
+
+        /* istanbul ignore if */
+        {
+          createChildren(vnode, children, insertedVnodeQueue);
+          if (isDef(data)) {
+            invokeCreateHooks(vnode, insertedVnodeQueue);
+          }
+          insert(parentElm, vnode.elm, refElm);
+        }
+
+        if (data && data.pre) {
+          creatingElmInVPre--;
+        }
+      } else if (isTrue(vnode.isComment)) {
+        vnode.elm = nodeOps.createComment(vnode.text);
+        insert(parentElm, vnode.elm, refElm);
+      } else {
+        vnode.elm = nodeOps.createTextNode(vnode.text);
+        insert(parentElm, vnode.elm, refElm);
+      }
+    }
+
+```
 
 ## registerRef
 

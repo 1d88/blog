@@ -56,12 +56,12 @@ interface VNodeData {
   refInFor?: boolean; // 是否是for中的ref引用
   tag?: string; // tag
   staticClass?: string; //
-  class?: any;
+  class?: any; // v-bind:class 
   staticStyle?: { [key: string]: any };
-  style?: string | object[] | object; // 样式
+  style?: string | object[] | object; // v-bind:style
   props?: { [key: string]: any }; // 实例属性
-  attrs?: { [key: string]: any }; // 属性
-  domProps?: { [key: string]: any }; // dom的属性
+  attrs?: { [key: string]: any }; // 普通的html属性
+  domProps?: { [key: string]: any }; // dom 对象的属性
   hook?: { [key: string]: Function }; 
   on?: { [key: string]: Function | Function[] }; // 自定义事件
   nativeOn?: { [key: string]: Function | Function[] }; // 原生的事件
